@@ -1,0 +1,21 @@
+Servidor:
+acepta conexiones de multiples clientes.
+
+se conecta uno:
+	-notificar al resto de clientes.
+	-informar al recién conectado los que se encuentran en linea
+	-cuando se desconecta un cliente se informa al resto.
+
+Clientes:
+	-envió de mensajes.
+	-recepción de mensajes.
+	-nunca deberá pasar por el servidor.
+	-comunicación de cliente a cliente.
+
+Opcional:
+	-grupos de amistad
+	-registro en el sistema(nombre de usuario y clave de acceso)
+	-solicitar amistad si conoce el nombre de usuario
+	-aceptar solicitud de amistad.
+	-solicitud disponible aunque el solicitado no esté en linea. (almacenada en el servidor).
+	-informar que amigos están en linea.
