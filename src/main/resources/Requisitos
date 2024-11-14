@@ -1,16 +1,69 @@
 Servidor:
 acepta conexiones de multiples clientes.
 
+
 se conecta uno:
-	-notificar al resto de clientes.
+
+    notificar(listaClientes, mensaje) (aplica sobre los clientes del grupo de amistad)
+        - a un cliente que conecta, se le manda la lista de todos los online y solicitudes dirigidas a él
+        - a un clienta ya conectado, se le manda la referencia remota del cliente nuevo
+
+    anadirCliente(listaClientes, cliente)
+    obtenerAmigosEnLinea(cliente)
+
+    actualizarGrupoAmistad(idGrupo)
+
+
+    listaClientes: <usuario, contrasena, idGrupoAmistad, solicitudesPendientes, historialChats>
+    	                 (parte 1)                  (parte 2)                     (parte 3)
+
+    Integer idGrupo: por defecto, NULL
+
+    listaSolicitudes : <clienteOrigen, clienteDestino>
+
+
+	-notificar al resto de clientes cuando se registra uno nuevo.
+	-notificar a amigos a cada amigo nuevo.
 	-informar al recién conectado los que se encuentran en linea
 	-cuando se desconecta un cliente se informa al resto.
 
-Clientes:
+Clientes: al abrir, ventana de LOGIN, llama a login en servidor (existe); si no, muestra mensaje (llama a signup en servidor)
+
+    Atributos: <usuario, contrasena, idGrupoAmistad, solicitudesPendientes, historialChats>
+
+    (requisitos de contrasena)
+
+    PARTE 3:
+    	    enviarMensaje(clienteDestino, mensaje)
+    	    recibirMensaje(clienteOrigen)
+    	    registrarCliente(usuario, contrasena)
+    	    login(usuario, contrasena)
+
+    PARTE 2:
+    	    enviarSolicitud(clienteDestino)
+    	    aceptarSolicitud(clienteDestino) => hacerse amigo de todos los de clienteDestino.grupoAmistad
+    	    rechazarSolicitud(clienteDestino)
+    	    hacerseAmigo(clienteDestino)
+    	    dejarAmistad(clienteDestino)
+
+    existe(usuario)
+
 	-envió de mensajes.
 	-recepción de mensajes.
 	-nunca deberá pasar por el servidor.
 	-comunicación de cliente a cliente.
+
+
+Solicitud:
+    <clienteOrigen, clienteDestino>
+
+Chat:
+    <cliente1, cliente2, idGrupo, mensajes>
+
+
+Mensaje:
+    <clienteOrigen, clienteDestino, contenido>
+
 
 Opcional:
 	-grupos de amistad
