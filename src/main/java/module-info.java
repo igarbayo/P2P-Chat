@@ -1,8 +1,9 @@
-module com.p2p {
+module com.Server {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.rmi;
 
 
-    opens com.p2p to javafx.fxml;
-    exports com.p2p;
+    opens com.Server to javafx.fxml;
+    exports com.Server;
 }

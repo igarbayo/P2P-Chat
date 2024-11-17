@@ -5,33 +5,23 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+
 public class Server {
 
-    // Variables estáticas
-    public static int s = 1;        // número de servidores
+    // Variable estática
+    public final static int PUERTO = 6789;
 
     public static void main(String[] args) {
 
-        // El argumento será el array de puertos para los servidores
-        if (args.length < 3) {
-            System.err.println("Uso: java Server <id> <IP> <puerto>");
-            return;
-        }
-
-        // Orden de argumentos
-        // args[0] = id
-        // args[1] = IP
-        // args[2] = puerto
-
         try {
-            MontecarloImpl exportedObj = new MontecarloImpl();
+            ServerImpl exportedObj = new ServerImpl();
             // Seleccionamos el puerto
-            startRegistry(Integer.parseInt(args[2]));
+            startRegistry(PUERTO);
             // Registramos el objeto con el nombre “id”
-            String registryURL = "rmi://" + args[1] + ":" + Integer.parseInt(args[2]) + "/" + args[0];
+            String registryURL = "rmi://" + "localhost" + ":" + PUERTO + "/chat";
             // Hacemos el bind en el registro indicado
             Naming.rebind(registryURL, exportedObj);
-            System.out.println("Servidor " + args[0] + " ready.");
+            System.out.println("Servidor listo.");
         }
         catch (RemoteException | MalformedURLException e) {
             throw new RuntimeException(e);
