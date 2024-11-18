@@ -1,9 +1,16 @@
 package com.Client;
 
+import com.Server.ServerInterface;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Client {
+public class Client extends Application {
+
 
     private ClientInfo info;
     // los chats se almacenan en cada instancia de cliente de forma local, cada vez que se arranca
@@ -27,6 +34,8 @@ public class Client {
         this.chats = chats;
     }
 
+    ConexionController conexionControlador;
+    InicioController inicioControlador;
     public Client() {
         this.info = null;
         this.chats = new ArrayList<Chat>();
@@ -71,6 +80,25 @@ public class Client {
 
     public boolean existe(String usuario) {
         return false;
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader conexionLoader = new FXMLLoader(getClass().getResource("ConexionCliente-view.fxml"));
+        Scene conexionScene= new Scene(conexionLoader.load());
+        Stage conexionStage = new Stage();
+        conexionStage.setScene(conexionScene);
+        conexionStage.setResizable(false);
+        conexionStage.setOnCloseRequest(event -> {
+            System.out.println("Se ha cerrado la ventana de establecimiento de conexión");
+            System.exit(0);
+        });
+        conexionControlador = conexionLoader.getController();
+        conexionStage.show();
+
+    }
+    public static void main(String[] args) {
+        launch();
     }
 
 }
