@@ -7,9 +7,17 @@ import com.Client.ClientInfo;
 
 import java.rmi.*;
 import java.util.List;
+import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
+    /**
+     *
+     * @param cliente
+     * @return
+     * @throws RemoteException
+     */
+    public boolean existeCliente(Client cliente) throws RemoteException;
     /**
      *
      * @param cliente

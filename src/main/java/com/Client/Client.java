@@ -1,17 +1,19 @@
 package com.Client;
 
+import com.Server.Server;
 import com.Server.ServerInterface;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Client {
 
+public class Client implements Serializable {
+    private static final long serialVersionUID = 1L;
     // Atributos
     private ClientInfo info;
     // los chats se almacenan en cada instancia de cliente de forma local, cada vez que se arranca

@@ -2,8 +2,9 @@ package com.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
-public class ClientInfo {
+public class ClientInfo implements Serializable {
 
     // Atributos
     private String usuario;

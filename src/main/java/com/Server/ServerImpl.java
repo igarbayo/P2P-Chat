@@ -22,9 +22,16 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         this.listaSolicitudes = new HashMap<>();
     }
 
+    public boolean existeCliente(Client client) throws RemoteException {
+        return this.listaClientes.containsKey(client) && this.listaClientes.get(client).getContrasena().equals(client.getInfo().getContrasena());
+    }
 
     public void anadirCliente(Client cliente) throws RemoteException {
-
+        ArrayList<Client> listaTodosClientes=new ArrayList<>();
+        listaTodosClientes.addAll(listaSolicitudes.keySet());
+        listaClientes.put(cliente,cliente.getInfo()); //añado cliente al mapa de clientes
+        System.out.println("Cliente anadido");
+        //notificar(listaTodosClientes,"nuevo cliente en la plataforma. Nombre de usuario: "+cliente.getInfo().getUsuario());//notifico a los usuarios de un nuevo cliente (¿haría falta un atributo que indicara qn está online?
     }
 
     public List<ClientInfo> obtenerAmigosEnLinea(Client cliente) throws RemoteException {

@@ -64,7 +64,42 @@ public class InicioController extends AbstractVentana {
         //Aquí iria comprobacion de contraseña y usuario validos
         //-
         //-
+        if (username.isEmpty()||password.isEmpty()) {
+            mostrarError("Por favor, cubra ambos campos");
+            return;
+        }
 
+        try{
+            Client client = new Client();
+            ClientInfo info = new ClientInfo(username, password);
+            client.setInfo(info);
+
+
+            if(this.getServer().existeCliente(client)){
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+                Scene scene = new Scene(fxmlLoader.load());
+
+                // Carga el stage
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                stage.setScene(scene);
+                stage.show();
+
+                // Pasa la instancia del servidor
+                PrincipalController controller = fxmlLoader.getController();
+                controller.setServer(this.getServer());
+
+                this.setClient(client);
+                controller.setClient(client);
+
+
+            }else{
+                mostrarError("Usuario o contraseña incorrectos");
+            }
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         /*try{
 
@@ -80,6 +115,54 @@ public class InicioController extends AbstractVentana {
         //Aquí iria comprobacion de contraseña y usuario validos
         //-
         //-
+        System.out.println("1");
+        if (username.isEmpty()||password.isEmpty()) {
+            mostrarError("Por favor, cubra ambos campos");
+            return;
+        }
+        System.out.println("2");
+
+        try {
+            Client client = new Client();
+            ClientInfo info = new ClientInfo(username, password);
+            client.setInfo(info);
+            System.out.println("3");
+
+            System.out.println("4");
+            if(this.getServer().existeCliente(client)){
+                mostrarError("El cliente ya existe");
+                return;
+            }else{
+                System.out.println("5");
+
+                this.getServer().anadirCliente(client);
+                System.out.println("6");
+                if(this.getServer().existeCliente(client)){
+                    mostrarError("El cliente ya existe");
+                }else{
+                    System.out.println("7");
+                }
+                // Cargar el archivo FXML
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+                Scene scene = new Scene(fxmlLoader.load());
+
+                // Carga el stage
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                stage.setScene(scene);
+                stage.show();
+
+                // Pasa la instancia del servidor
+                PrincipalController controller = fxmlLoader.getController();
+                controller.setServer(this.getServer());
+
+                this.setClient(client);
+                controller.setClient(client);
+
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
