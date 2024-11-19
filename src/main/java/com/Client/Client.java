@@ -8,73 +8,98 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Client extends Application {
+public class Client {
 
-
+    // Atributos
     private ClientInfo info;
     // los chats se almacenan en cada instancia de cliente de forma local, cada vez que se arranca
     // se borran cuando se cierra la instancia del cliente, puesto que la app tampoco deja mandar
     // mensajes si un cliente no está conectado
     private List<Chat> chats;
 
+    // Getters y Setters
     public ClientInfo getInfo() {
         return info;
     }
-
     public void setInfo(ClientInfo info) {
         this.info = info;
     }
-
     public List<Chat> getChats() {
         return chats;
     }
-
     public void setChats(List<Chat> chats) {
         this.chats = chats;
     }
 
-    ConexionController conexionControlador;
-    InicioController inicioControlador;
+    // Constructor
     public Client() {
         this.info = null;
         this.chats = new ArrayList<Chat>();
     }
 
     // Métodos
+
+    /**
+     *
+     * @param client
+     * @param mensaje
+     */
     public void enviarMensaje(Client client, String mensaje) {
 
     }
 
+    /**
+     *
+     * @param client
+     */
     public void recibirMensaje(Client client) {
 
     }
 
+    /**
+     *
+     * @param usuario
+     * @param constrasena
+     */
     public void signup(String usuario, String constrasena) {
 
     }
 
+    /**
+     *
+     * @param usuario
+     * @param constrasena
+     */
     public void login(String usuario, String constrasena) {
 
     }
 
-    public void enviarSolicitudAmistad(Client client) {
+    /**
+     *devuelve -1 si el usuario no existe
+     */
+    public int enviarSolicitudAmistad(String username) {
+        return -1;
+    }
+
+    /**
+     *
+     * @param client
+     */
+    public void aceptarSolicitudAmistad(ClientInfo client) {
 
     }
 
-    public void aceptarSolicitudAmistad(Client client) {
+    public void rechazarSolicitudAmistad(ClientInfo client) {
 
     }
 
-    public void rechazarSolicitudAmistad(Client client) {
+    public void hacerseAmigo(ClientInfo client) {
 
     }
 
-    public void hacerseAmigo(Client client) {
-
-    }
-
-    public void dejarAmistad(Client client) {
+    public void dejarAmistad(ClientInfo client) {
 
     }
 
@@ -82,23 +107,13 @@ public class Client extends Application {
         return false;
     }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        FXMLLoader conexionLoader = new FXMLLoader(getClass().getResource("ConexionCliente-view.fxml"));
-        Scene conexionScene= new Scene(conexionLoader.load());
-        Stage conexionStage = new Stage();
-        conexionStage.setScene(conexionScene);
-        conexionStage.setResizable(false);
-        conexionStage.setOnCloseRequest(event -> {
-            System.out.println("Se ha cerrado la ventana de establecimiento de conexión");
-            System.exit(0);
-        });
-        conexionControlador = conexionLoader.getController();
-        conexionStage.show();
+    public List<String> obtenerNombresDeUsuario(List<ClientInfo> listaClientInfo) {
+        return listaClientInfo.stream()  // Convierte la lista en un stream
+                .map(ClientInfo::getUsuario) // Mapea cada ClientInfo a su atributo usuario
+                .collect(Collectors.toList()); // Recoge los resultados en una lista
+    }
 
-    }
-    public static void main(String[] args) {
-        launch();
-    }
+
+
 
 }

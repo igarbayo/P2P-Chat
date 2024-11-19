@@ -27,6 +27,14 @@ public interface ServerInterface extends Remote {
 
     /**
      *
+     * @param cliente
+     * @return
+     * @throws RemoteException
+     */
+    public List<ClientInfo> obtenerAmigos(Client cliente) throws RemoteException;
+
+    /**
+     *
      * @param idGrupo
      * @throws RemoteException
      */

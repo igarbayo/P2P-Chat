@@ -3,12 +3,15 @@ package com.Client;
 import com.Server.ServerInterface;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.Naming;
@@ -47,11 +50,25 @@ public class ConexionController implements Initializable {
 
         try{
             server = (ServerInterface) Naming.lookup(registryURL);
+
+            // Cargar el archivo FXML
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("InicioCliente-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+
+            // Carga el stage
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.close();
-        }catch(NotBoundException | MalformedURLException | RemoteException e){
+            stage.setScene(scene);
+            stage.show();
+
+            // Pasa la instancia del servidor
+            InicioController controller = fxmlLoader.getController();
+            controller.setServer(server);
+
+        } catch(NotBoundException | MalformedURLException | RemoteException e){
             System.out.println("Excepcion conexion: " + e.getMessage());
             mostarError("No se pudo conectar con el servidor");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     //Hace visible el mensaje de error de conexion en caso de error

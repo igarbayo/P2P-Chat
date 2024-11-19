@@ -2,6 +2,7 @@ module com.Server {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.rmi;
+    requires java.desktop;
 
     // Permite la reflexión para el paquete com.Server
     opens com.Server to javafx.fxml;

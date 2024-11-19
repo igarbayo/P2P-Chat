@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.AbandonarController">
+   <children>
+      <Label layoutX="155.0" layoutY="184.0" text="¿Estás seguro?" />
+      <Button layoutX="300.0" layoutY="180.0" mnemonicParsing="false" text="Sí" />
+      <Button layoutX="349.0" layoutY="180.0" mnemonicParsing="false" text="No" />
+   </children>
+</AnchorPane>

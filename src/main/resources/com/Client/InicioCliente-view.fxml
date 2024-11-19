@@ -4,8 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-
-<AnchorPane fx:id="anchorPane" prefWidth="600.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.InicioController">
+<AnchorPane fx:id="anchorPane" prefHeight="300.0" prefWidth="600.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.InicioController">
    <children>
       <AnchorPane prefHeight="87.0" prefWidth="600.0" style="-fx-background-color: lightgray;">
          <children>
@@ -14,6 +13,7 @@
                   <Font name="Verdana Bold Italic" size="25.0" />
                </font>
             </Text>
+            <Button fx:id="botonProbar" layoutX="39.0" layoutY="32.0" mnemonicParsing="false" onAction="#probar" text="Boton para probar"/>
          </children>
       </AnchorPane>
       <Text fill="#1c04a4" layoutX="102.0" layoutY="143.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username">
@@ -26,10 +26,10 @@
             <Font name="Verdana" size="18.0" />
          </font>
       </Text>
-      <TextField fx:id="usernameTextField" layoutY="123.0" promptText="username" />
+      <TextField fx:id="usernameTextField" layoutX="332.0" layoutY="125.0" promptText="username" />
       <TextField fx:id="passwordTextField" accessibleRole="PASSWORD_FIELD" layoutX="332.0" layoutY="188.0" promptText="password" />
-      <Button layoutX="332.0" layoutY="253.0" mnemonicParsing="false" onAction="#onBotonLogin" text="LogIn" />
-      <Button layoutX="430.0" layoutY="253.0" mnemonicParsing="false" onAction="#onBotonRegistrar" text="SingUp" />
-      <Text fx:id="errorText" fill="#ea3535" layoutX="102.0" layoutY="270.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mensaje de error" wrappingWidth="182.95899963378906" />
+      <Button layoutX="332.0" layoutY="245.0" mnemonicParsing="false" onAction="#onBotonLogin" text="LogIn" />
+      <Button layoutX="418.0" layoutY="245.0" mnemonicParsing="false" onAction="#onBotonRegistrar" text="SingUp" />
+      <Text fx:id="errorText" fill="#ea3535" layoutX="103.0" layoutY="262.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mensaje de error" wrappingWidth="182.95899963378906" />
    </children>
 </AnchorPane>
