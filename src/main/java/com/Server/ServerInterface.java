@@ -13,11 +13,14 @@ public interface ServerInterface extends Remote {
 
     /**
      *
-     * @param cliente
+     * @param clientInfo
      * @return
      * @throws RemoteException
      */
-    public boolean existeCliente(Client cliente) throws RemoteException;
+    public boolean existeCliente(ClientInfo clientInfo) throws RemoteException;
+
+    public boolean cargarDatos(Client client) throws RemoteException;
+
     /**
      *
      * @param cliente

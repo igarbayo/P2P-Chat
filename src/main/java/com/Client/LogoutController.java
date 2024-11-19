@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AbandonarController extends AbstractVentana{
+public class LogoutController extends AbstractVentana{
 
     @FXML
     private Button botonSi;
@@ -28,37 +28,35 @@ public class AbandonarController extends AbstractVentana{
     }
 
     // Constructor
-    public AbandonarController() {
+    public LogoutController() {
         this.oldStage = null;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resources) {
+
     }
 
     @FXML
     public void onSi(ActionEvent actionEvent) {
-        // Ponemos el grupo del ClientInfo a null
-        if (this.getClient() != null && this.getClient().getInfo() != null) {
-            this.getClient().getInfo().setIdGrupo(null);
-        }
+        // Ponemos vacia la ClientInfo de la instancia de Client actual
+        this.getClient().setInfo(null);
 
         try {
             // Cargar el archivo FXML
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("InicioCliente-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
 
             oldStage.setScene(scene);
             oldStage.show();
 
             // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
-            PrincipalController controller = fxmlLoader.getController();
+            InicioController controller = fxmlLoader.getController();
             controller.setServer(this.getServer());
             controller.setClient(this.getClient());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @FXML

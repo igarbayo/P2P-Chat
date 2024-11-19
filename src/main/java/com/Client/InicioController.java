@@ -74,24 +74,26 @@ public class InicioController extends AbstractVentana {
             ClientInfo info = new ClientInfo(username, password);
             client.setInfo(info);
 
+            if(this.getServer().existeCliente(info)){
+                // Cargamos la informacion del usuario desde el servidor
+                if (this.getServer().cargarDatos(client)) {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+                    Scene scene = new Scene(fxmlLoader.load());
 
-            if(this.getServer().existeCliente(client)){
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
-                Scene scene = new Scene(fxmlLoader.load());
+                    // Carga el stage
+                    Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    stage.setScene(scene);
+                    stage.show();
 
-                // Carga el stage
-                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                stage.setScene(scene);
-                stage.show();
+                    // Pasa la instancia del servidor
+                    PrincipalController controller = fxmlLoader.getController();
+                    controller.setServer(this.getServer());
 
-                // Pasa la instancia del servidor
-                PrincipalController controller = fxmlLoader.getController();
-                controller.setServer(this.getServer());
-
-                this.setClient(client);
-                controller.setClient(client);
-
-
+                    this.setClient(client);
+                    controller.setClient(client);
+                } else {
+                    mostrarError("Usuario o contraseña incorrectos");
+                }
             }else{
                 mostrarError("Usuario o contraseña incorrectos");
             }
@@ -129,7 +131,7 @@ public class InicioController extends AbstractVentana {
             System.out.println("3");
 
             System.out.println("4");
-            if(this.getServer().existeCliente(client)){
+            if(this.getServer().existeCliente(info)){
                 mostrarError("El cliente ya existe");
                 return;
             }else{
@@ -137,7 +139,7 @@ public class InicioController extends AbstractVentana {
 
                 this.getServer().anadirCliente(client);
                 System.out.println("6");
-                if(this.getServer().existeCliente(client)){
+                if(this.getServer().existeCliente(info)){
                     mostrarError("El cliente ya existe");
                 }else{
                     System.out.println("7");

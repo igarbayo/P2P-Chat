@@ -32,6 +32,8 @@ public class PrincipalController extends AbstractVentana {
     private Button botonEnviar;
     @FXML
     private Button botonAbandonar;
+    @FXML
+    private Button botonLogout;
 
     // Disposición inicial
     @Override
@@ -114,16 +116,43 @@ public class PrincipalController extends AbstractVentana {
             Stage newStage = new Stage();
             newStage.setScene(scene);
             newStage.show();
+            // Guarda el stage actual
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
 
             // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
             AbandonarController controller = fxmlLoader.getController();
+            controller.setOldStage(stage);
             controller.setServer(this.getServer());
             controller.setClient(this.getClient());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+    }
 
+
+    @FXML
+    public void onLogout(ActionEvent event) {
+        try {
+            // Cargar el archivo FXML
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Logout-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+
+            // Crear un nuevo Stage para la nueva ventana
+            Stage newStage = new Stage();
+            newStage.setScene(scene);
+            newStage.show();
+            // Guarda el stage actual
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+
+            // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
+            LogoutController controller = fxmlLoader.getController();
+            controller.setOldStage(stage);
+            controller.setServer(this.getServer());
+            controller.setClient(this.getClient());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
