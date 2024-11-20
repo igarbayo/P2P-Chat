@@ -103,11 +103,7 @@ public class InicioController extends AbstractVentana {
             throw new RuntimeException(e);
         }
 
-        /*try{
 
-        }catch(){
-
-        }*/
     }
 
     @FXML
@@ -117,33 +113,22 @@ public class InicioController extends AbstractVentana {
         //Aquí iria comprobacion de contraseña y usuario validos
         //-
         //-
-        System.out.println("1");
         if (username.isEmpty()||password.isEmpty()) {
             mostrarError("Por favor, cubra ambos campos");
             return;
         }
-        System.out.println("2");
+
 
         try {
             Client client = new Client();
             ClientInfo info = new ClientInfo(username, password);
             client.setInfo(info);
-            System.out.println("3");
 
-            System.out.println("4");
             if(this.getServer().existeCliente(info)){
-                mostrarError("El cliente ya existe");
+                mostrarError("Este usuario ya existe");
                 return;
             }else{
-                System.out.println("5");
-
                 this.getServer().anadirCliente(client);
-                System.out.println("6");
-                if(this.getServer().existeCliente(info)){
-                    mostrarError("El cliente ya existe");
-                }else{
-                    System.out.println("7");
-                }
                 // Cargar el archivo FXML
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
                 Scene scene = new Scene(fxmlLoader.load());
