@@ -2,6 +2,7 @@ package com.Client;
 
 import com.Server.Server;
 import com.Server.ServerInterface;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,34 +29,8 @@ public class InicioController extends AbstractVentana {
     private TextField usernameTextField;
     @FXML
     private TextField passwordTextField;
-    @FXML
-    private Button botonProbar;
 
     // Métodos de acciones
-    @FXML
-    public void probar(ActionEvent event) {
-        try {
-            // Cargar el archivo FXML
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-
-            // Carga el stage
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.show();
-
-            // Pasa la instancia del servidor
-            PrincipalController controller = fxmlLoader.getController();
-            controller.setServer(this.getServer());
-
-            // Creo un cliente de prueba
-            Client client = new Client();
-            this.setClient(client);
-            controller.setClient(client);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @FXML
     public void onBotonLogin(ActionEvent event) {
@@ -76,28 +51,36 @@ public class InicioController extends AbstractVentana {
 
             if(this.getServer().existeCliente(info)){
                 // Cargamos la informacion del usuario desde el servidor
-                if (this.getServer().cargarDatos(client)) {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
-                    Scene scene = new Scene(fxmlLoader.load());
+                // Verificamos la contraseña
+                // Quitñe uso de cargarDatos, daba problemas (no sé muy bien por qué)
+                if ((info = this.getServer().obtenerClienteInfo(username)) != null) {
+                    if (password.equals(info.getContrasena())) {
+                        client.setInfo(info);
+                        client.getInfo().setOnline(true);
+                        this.getServer().actualizarClienteInfo(client.getInfo());
+                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+                        Scene scene = new Scene(fxmlLoader.load());
 
-                    // Carga el stage
-                    Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                    stage.setScene(scene);
-                    stage.show();
+                        // Carga el stage
+                        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                        stage.setScene(scene);
+                        stage.show();
 
-                    // Pasa la instancia del servidor
-                    PrincipalController controller = fxmlLoader.getController();
-                    controller.setServer(this.getServer());
-
-                    this.setClient(client);
-                    controller.setClient(client);
+                        // Pasa la instancia del servidor y del cliente
+                        PrincipalController controller = fxmlLoader.getController();
+                        controller.setServer(this.getServer());
+                        this.setClient(client);
+                        controller.setClient(client);
+                        fxmlLoader.setController(controller);
+                    } else {
+                        mostrarError("Usuario o contraseña incorrectos");
+                    }
                 } else {
                     mostrarError("Usuario o contraseña incorrectos");
                 }
             }else{
                 mostrarError("Usuario o contraseña incorrectos");
             }
-
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -118,7 +101,6 @@ public class InicioController extends AbstractVentana {
             return;
         }
 
-
         try {
             Client client = new Client();
             ClientInfo info = new ClientInfo(username, password);
@@ -129,6 +111,8 @@ public class InicioController extends AbstractVentana {
                 return;
             }else{
                 this.getServer().anadirCliente(client);
+                client.getInfo().setOnline(true);
+                this.getServer().actualizarClienteInfo(client.getInfo());
                 // Cargar el archivo FXML
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
                 Scene scene = new Scene(fxmlLoader.load());
@@ -141,9 +125,9 @@ public class InicioController extends AbstractVentana {
                 // Pasa la instancia del servidor
                 PrincipalController controller = fxmlLoader.getController();
                 controller.setServer(this.getServer());
-
                 this.setClient(client);
                 controller.setClient(client);
+                fxmlLoader.setController(controller);
 
             }
 
@@ -164,6 +148,7 @@ public class InicioController extends AbstractVentana {
     @Override
     public void initialize(URL url, ResourceBundle resources) {
         errorText.setVisible(false);
+        Client client = new Client();
     }
 
 }

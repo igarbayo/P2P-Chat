@@ -78,27 +78,41 @@ public class Client implements Serializable {
 
     }
 
-    /**
-     *devuelve -1 si el usuario no existe
-     */
-    public int enviarSolicitudAmistad(String username) {
-        return -1;
-    }
+
 
     /**
      *
-     * @param client
+     * @param
      */
-    public void aceptarSolicitudAmistad(ClientInfo client) {
+    public void aceptarSolicitudAmistad(ClientInfo clienteSolicitante) {
+        // Verificar que el cliente solicitante no sea nulo
+        if (clienteSolicitante != null && this.info != null) {
 
+            // 1. Establecer el idGrupo de 'clienteSolicitante' si es null.
+            if (clienteSolicitante.getIdGrupo() == null) {
+                int fechaActual = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+                System.out.println(fechaActual);
+                clienteSolicitante.setIdGrupo(fechaActual);  // Asignar la fecha actual como idGrupo de 'clienteSolicitante'.
+            }
+
+            // 2. Establecer el idGrupo de 'this'
+            this.info.setIdGrupo(clienteSolicitante.getIdGrupo());  // Asignar el idGrupo de 'clienteSolicitante' a 'this'.
+
+            // 3. Borrar la solicitud de la lista de 'this'
+            this.info.getListaSolicitudes().remove(clienteSolicitante.getUsuario());
+
+            // (Opcional) Confirmación
+            System.out.println("Solicitud de amistad aceptada: " + this.getInfo().getIdGrupo() + clienteSolicitante.getIdGrupo());
+        } else {
+            // Si los objetos son nulos, manejar el error
+            System.out.println("Error: Cliente o información no válida.");
+        }
     }
 
-    public void rechazarSolicitudAmistad(ClientInfo client) {
 
-    }
-
-    public void hacerseAmigo(ClientInfo client) {
-
+    public void rechazarSolicitudAmistad(ClientInfo clienteSolicitante) {
+        // Eliminar la solicitud de la lista de solicitudes
+        this.info.getListaSolicitudes().remove(clienteSolicitante.getUsuario());
     }
 
     public void dejarAmistad(ClientInfo client) {
@@ -114,6 +128,12 @@ public class Client implements Serializable {
                 .map(ClientInfo::getUsuario) // Mapea cada ClientInfo a su atributo usuario
                 .collect(Collectors.toList()); // Recoge los resultados en una lista
     }
+
+
+
+
+
+
 
 
 

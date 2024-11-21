@@ -11,6 +11,9 @@ import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
+    public void actualizarClienteInfo(ClientInfo clientInfo) throws RemoteException;
+    public ClientInfo obtenerClienteInfo(String username) throws RemoteException;
+
     /**
      *
      * @param clientInfo
@@ -18,6 +21,8 @@ public interface ServerInterface extends Remote {
      * @throws RemoteException
      */
     public boolean existeCliente(ClientInfo clientInfo) throws RemoteException;
+
+    public boolean existeCliente(String username) throws RemoteException;
 
     public boolean cargarDatos(Client client) throws RemoteException;
 

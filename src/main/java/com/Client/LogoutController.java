@@ -1,8 +1,10 @@
 package com.Client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
@@ -34,14 +36,13 @@ public class LogoutController extends AbstractVentana{
 
     @Override
     public void initialize(URL url, ResourceBundle resources) {
-
+        Platform.runLater(() -> {
+            System.out.println(this.getClient().getInfo());
+        });
     }
 
     @FXML
     public void onSi(ActionEvent actionEvent) {
-        // Ponemos vacia la ClientInfo de la instancia de Client actual
-        this.getClient().setInfo(null);
-
         try {
             // Cargar el archivo FXML
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("InicioCliente-view.fxml"));
@@ -50,10 +51,20 @@ public class LogoutController extends AbstractVentana{
             oldStage.setScene(scene);
             oldStage.show();
 
+            // Obtener el Stage actual a partir del control (ej. un botón)
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            stage.close(); // Cierra el Stage
+
             // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
             InicioController controller = fxmlLoader.getController();
             controller.setServer(this.getServer());
             controller.setClient(this.getClient());
+
+            // Ponemos vacia la ClientInfo de la instancia de Client actual
+            this.getClient().getInfo().setOnline(false);
+            this.getServer().actualizarClienteInfo(this.getClient().getInfo());
+            this.getClient().setInfo(null);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

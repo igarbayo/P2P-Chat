@@ -13,7 +13,6 @@
                   <Font name="Verdana Bold Italic" size="25.0" />
                </font>
             </Text>
-            <Button fx:id="botonProbar" layoutX="39.0" layoutY="32.0" mnemonicParsing="false" onAction="#probar" text="Boton para probar" />
          </children>
       </AnchorPane>
       <Text fill="#1c04a4" layoutX="102.0" layoutY="143.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username">
