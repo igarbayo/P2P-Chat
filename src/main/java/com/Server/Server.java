@@ -18,7 +18,7 @@ public class Server {
             // Seleccionamos el puerto
             startRegistry(PUERTO);
             // Registramos el objeto con el nombre “id”
-            String registryURL = "rmi://" + "localhost" + ":" + PUERTO + "/chat";
+            String registryURL = "rmi://" + "localhost" + ":" + PUERTO + "/server";
             // Hacemos el bind en el registro indicado
             Naming.rebind(registryURL, exportedObj);
             System.out.println("Servidor listo.");

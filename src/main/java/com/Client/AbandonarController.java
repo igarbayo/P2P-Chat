@@ -41,7 +41,7 @@ public class AbandonarController extends AbstractVentana{
     public void onSi(ActionEvent actionEvent) {
         // Ponemos el grupo del ClientInfo a null
         if (this.getClient() != null && this.getClient().getInfo() != null) {
-            this.getClient().getInfo().setIdGrupo(null);
+            //this.getClient().getInfo().setIdGrupo(null);
         }
 
         try {

@@ -1,38 +1,68 @@
 package com.Client;
 
+import java.util.Objects;
+
 public class Mensaje {
 
-    private Client clienteOrigen;
-    private Client clienteDestino;
+    // Atributos
+    private ClientInfo clienteOrigen;
+    private ClientInfo clienteDestino;
     private String contenido;
 
-    public Client getClienteOrigen() {
+    // Getters y setters
+    public ClientInfo getClienteOrigen() {
         return clienteOrigen;
     }
-
-    public void setClienteOrigen(Client clienteOrigen) {
-        this.clienteOrigen = clienteOrigen;
+    public void setClienteOrigen(ClientInfo clienteOrigen) {
+        if (clienteOrigen!=null) {
+            this.clienteOrigen = clienteOrigen;
+        }
     }
-
-    public Client getClienteDestino() {
+    public ClientInfo getClienteDestino() {
         return clienteDestino;
     }
-
-    public void setClienteDestino(Client clienteDestino) {
-        this.clienteDestino = clienteDestino;
+    public void setClienteDestino(ClientInfo clienteDestino) {
+        if (clienteDestino!=null) {
+            this.clienteDestino = clienteDestino;
+        }
     }
-
     public String getContenido() {
         return contenido;
     }
-
     public void setContenido(String contenido) {
-        this.contenido = contenido;
+        if (contenido!=null) {
+            this.contenido = contenido;
+        }
     }
 
-    public Mensaje(Client clienteOrigen, Client clienteDestino, String contenido) {
-        this.clienteOrigen = clienteOrigen;
-        this.clienteDestino = clienteDestino;
-        this.contenido = contenido;
+    // Constructores
+    public Mensaje(ClientInfo clienteOrigen, ClientInfo clienteDestino, String contenido) {
+        if (clienteOrigen!=null) {
+            this.clienteOrigen = clienteOrigen;
+        }
+        if (clienteDestino!=null) {
+            this.clienteDestino = clienteDestino;
+        }
+        if (contenido!=null) {
+            this.contenido = contenido;
+        }
+    }
+
+    // Equals para comparaciones
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Mensaje mensaje = (Mensaje) o;
+        return Objects.equals(clienteOrigen, mensaje.clienteOrigen) && Objects.equals(clienteDestino, mensaje.clienteDestino) && Objects.equals(contenido, mensaje.contenido);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clienteOrigen, clienteDestino, contenido);
+    }
+
+    @Override
+    public String toString() {
+        return "[" + clienteOrigen.getUsuario() + "] " + contenido;
     }
 }

@@ -4,6 +4,7 @@
 package com.Server;
 import com.Client.Client;
 import com.Client.ClientInfo;
+import com.Client.ClientInterface;
 
 import java.rmi.*;
 import java.util.List;
@@ -64,5 +65,7 @@ public interface ServerInterface extends Remote {
      */
     public void notificar(List<Client> clientes, String mensaje) throws RemoteException;
 
+
+    public void anadirClienteEnLinea(ClientInterface cliente) throws RemoteException;
 
 } // end interface

@@ -1,9 +1,14 @@
 package com.Client;
 
+import com.Server.ServerInterface;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.Arrays;
 
 public class LaunchClient extends Application {
     ConexionController conexionControlador;

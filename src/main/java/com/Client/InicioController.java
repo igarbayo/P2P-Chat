@@ -20,6 +20,26 @@ import java.util.ResourceBundle;
 
 public class InicioController extends AbstractVentana {
 
+    // Atributos
+    private String IP;
+    private int puerto;
+
+    public String getIP() {
+        return IP;
+    }
+
+    public void setIP(String IP) {
+        this.IP = IP;
+    }
+
+    public int getPuerto() {
+        return puerto;
+    }
+
+    public void setPuerto(int puerto) {
+        this.puerto = puerto;
+    }
+
     // Elementos gráficos
     @FXML
     private AnchorPane anchorPane;
@@ -58,6 +78,12 @@ public class InicioController extends AbstractVentana {
                         client.setInfo(info);
                         client.getInfo().setOnline(true);
                         this.getServer().actualizarClienteInfo(client.getInfo());
+
+                        // Registro RMI
+                        client.registrarCliente(IP, puerto);
+                        this.getServer().anadirClienteEnLinea(client);
+
+                        // Loader
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
                         Scene scene = new Scene(fxmlLoader.load());
 
@@ -113,6 +139,11 @@ public class InicioController extends AbstractVentana {
                 this.getServer().anadirCliente(client);
                 client.getInfo().setOnline(true);
                 this.getServer().actualizarClienteInfo(client.getInfo());
+
+                // Registro RMI
+                client.registrarCliente(IP, puerto);
+                this.getServer().anadirClienteEnLinea(client);
+
                 // Cargar el archivo FXML
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
                 Scene scene = new Scene(fxmlLoader.load());
@@ -147,8 +178,9 @@ public class InicioController extends AbstractVentana {
 
     @Override
     public void initialize(URL url, ResourceBundle resources) {
-        errorText.setVisible(false);
-        Client client = new Client();
+        Platform.runLater(() -> {
+            errorText.setVisible(false);
+        });
     }
 
 }

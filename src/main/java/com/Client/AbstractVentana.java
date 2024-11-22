@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 public abstract class AbstractVentana implements Initializable {
 
@@ -54,6 +55,16 @@ public abstract class AbstractVentana implements Initializable {
             controller.setClient(client);
             fxmlLoader.setController(controller);
         });
+    }
+
+
+    public void handleWindowClose() throws RemoteException {
+        // Cuando la ventana se cierra, se establece setOnline a false
+        if (this.getClient() != null && this.getClient().getInfo() != null) {
+            this.getClient().getInfo().setOnline(false);  // Establece el estado de "online" a false
+            this.getServer().actualizarClienteInfo(this.getClient().getInfo());
+            this.getClient().cerrarConexion();
+        }
     }
 
 }

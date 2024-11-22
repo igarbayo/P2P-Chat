@@ -2,50 +2,68 @@ package com.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class Chat {
 
-    private Client cliente1;
-    private Client cliente2;
-    private Integer idGrupo;
+    // Atributos
+    private Map<String, ClientInfo> clientes;
     private List<Mensaje> mensajes;
 
-    public Client getCliente1() {
-        return cliente1;
+    // Getters y setters
+    public Map<String, ClientInfo> getClientes() {
+        return clientes;
     }
-
-    public void setCliente1(Client cliente1) {
-        this.cliente1 = cliente1;
+    public void setClientes(Map<String, ClientInfo> clientes) {
+        if (clientes != null) {
+            this.clientes = clientes;
+        }
     }
-
-    public Client getCliente2() {
-        return cliente2;
-    }
-
-    public void setCliente2(Client cliente2) {
-        this.cliente2 = cliente2;
-    }
-
-    public Integer getIdGrupo() {
-        return idGrupo;
-    }
-
-    public void setIdGrupo(Integer idGrupo) {
-        this.idGrupo = idGrupo;
-    }
-
     public List<Mensaje> getMensajes() {
         return mensajes;
     }
-
     public void setMensajes(List<Mensaje> mensajes) {
-        this.mensajes = mensajes;
+        if (mensajes!=null) {
+            this.mensajes = mensajes;
+        }
     }
 
-    public Chat(Client cliente1, Client cliente2, Integer idGrupo) {
-        this.cliente1 = cliente1;
-        this.cliente2 = cliente2;
-        this.idGrupo = idGrupo;
+    // Constructor
+    public Chat(Map<String, ClientInfo> clientes) {
+        if (clientes!=null) {
+            this.clientes = clientes;
+        }
         this.mensajes = new ArrayList<>();
+    }
+
+    // Añadir un mensaje
+    public void anadirMensaje(Mensaje mensaje) {
+        if (mensaje!=null &&
+                clientes.containsValue(mensaje.getClienteOrigen()) &&
+                clientes.containsValue(mensaje.getClienteDestino())
+        ) {
+            this.mensajes.add(mensaje);
+        }
+    }
+
+    // Eliminar mensaje
+    public void eliminarMensaje(Mensaje mensaje) {
+        if (mensaje!=null) {
+            mensajes.remove(mensaje);
+        }
+    }
+
+    // Método equals
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Chat chat = (Chat) o;
+        return Objects.equals(clientes, chat.clientes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(clientes);
     }
 }

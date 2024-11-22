@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.AmigoController">
+   <children>
+      <ScrollPane layoutX="27.0" layoutY="60.0" prefHeight="270.0" prefWidth="549.0">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <VBox fx:id="chatBox" layoutX="11.0" layoutY="5.0" prefHeight="261.0" prefWidth="527.0" />
+                   <!-- Los mensajes se agregan dinámicamente aquí -->
+               </children>
+            </AnchorPane>
+        </content>
+      </ScrollPane>
+      <Label layoutX="27.0" layoutY="28.0" text="Amigo" />
+      <Label fx:id="usernameAmigo" layoutX="86.0" layoutY="28.0" text="username" />
+      <Button fx:id="botonDejar" layoutX="466.0" layoutY="24.0" mnemonicParsing="false" text="Dejar amistad" textAlignment="RIGHT" />
+      <TextArea layoutX="27.0" layoutY="342.0" prefHeight="45.0" prefWidth="460.0" promptText="Escriba el mensaje" />
+      <Button fx:id="botonEnviar" layoutX="505.0" layoutY="353.0" mnemonicParsing="false" text="Enviar" />
+   </children>
+</AnchorPane>

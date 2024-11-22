@@ -46,7 +46,7 @@ public class ConexionController implements Initializable {
         }
 
         int puerto = puertoSpinner.getValue();
-        String registryURL = "rmi://" + nombreHost + ":" + puerto+"/chat";
+        String registryURL = "rmi://" + nombreHost + ":" + puerto+"/server";
 
         try{
             server = (ServerInterface) Naming.lookup(registryURL);
@@ -63,6 +63,8 @@ public class ConexionController implements Initializable {
             // Pasa la instancia del servidor
             InicioController controller = fxmlLoader.getController();
             controller.setServer(server);
+            controller.setIP(nombreHost);
+            controller.setPuerto(puerto);
 
         } catch(NotBoundException | MalformedURLException | RemoteException e){
             System.out.println("Excepcion conexion: " + e.getMessage());

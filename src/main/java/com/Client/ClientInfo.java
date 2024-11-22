@@ -10,7 +10,7 @@ public class ClientInfo implements Serializable {
     // Atributos
     private String usuario;
     private String contrasena;
-    private Integer idGrupo;
+    private List<String> listaAmigos;
     private List<String> listaSolicitudes;
     private boolean online;
 
@@ -27,15 +27,11 @@ public class ClientInfo implements Serializable {
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }
-    public Integer getIdGrupo() {
-        if (idGrupo == null) {
-            return null;
-        } else {
-            return idGrupo;
-        }
+    public List<String> getListaAmigos() {
+        return listaAmigos;
     }
-    public void setIdGrupo(Integer idGrupo) {
-        this.idGrupo = idGrupo;
+    public void setListaAmigos(List<String> listaAmigos) {
+        this.listaAmigos = listaAmigos;
     }
     public List<String> getListaSolicitudes() {
         return listaSolicitudes;
@@ -54,8 +50,8 @@ public class ClientInfo implements Serializable {
     public ClientInfo(String usuario, String contrasena) {
         this.usuario = usuario;
         this.contrasena = contrasena;
-        this.idGrupo = null;
-        this.listaSolicitudes = new ArrayList<String>();
+        this.listaAmigos = new ArrayList<>();
+        this.listaSolicitudes = new ArrayList<>();
         this.online = false;
     }
 
@@ -75,11 +71,11 @@ public class ClientInfo implements Serializable {
     @Override
     public String toString() {
         return "ClientInfo{" +
-                "usuario='" + usuario + '\'' +
-                ", contrasena='" + contrasena + '\'' +
-                ", idGrupo=" + idGrupo +
-                ", listaSolicitudes=" + listaSolicitudes +
-                ", online=" + online +
+                "\n\tusuario='" + usuario + '\'' +
+                ", \n\tcontrasena='" + contrasena + '\'' +
+                ", \n\tlistaAmigos=" + listaAmigos +
+                ", \n\tlistaSolicitudes=" + listaSolicitudes +
+                ", \n\tonline=" + online +
                 '}';
     }
 }

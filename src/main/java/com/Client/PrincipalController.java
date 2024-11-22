@@ -34,12 +34,31 @@ public class PrincipalController extends AbstractVentana {
     @FXML
     private Button botonEnviar;
     @FXML
-    private Button botonAbandonar;
-    @FXML
     private Button botonLogout;
     @FXML
     private Label usernameLabel;
 
+
+    private void openAmigoView(String amigoSeleccionado) {
+        try {
+            // Cargar el archivo FXML
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Amigo-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+
+            // Crear un nuevo Stage para la nueva ventana
+            Stage newStage = new Stage();
+            newStage.setScene(scene);
+            newStage.show();
+
+            // Pasa la instancia del servidor, cliente y el amigo seleccionado al controlador de la nueva ventana
+            AmigoController amigoController = fxmlLoader.getController();
+            amigoController.setServer(this.getServer());
+            amigoController.setClient(this.getClient());
+            amigoController.setAmigo(amigoSeleccionado); // Aquí pasas el nombre o la información del amigo seleccionado
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     // Disposición inicial
@@ -122,15 +141,6 @@ public class PrincipalController extends AbstractVentana {
                             }
                             this.getClient().aceptarSolicitudAmistad(clientInfo);
                             try {
-                                this.getServer().actualizarClienteInfo(this.getClient().getInfo());
-                                // Borrar el resto de solicitudes con el mismo idGrupo de la lista de 'this'
-                                for (String usr : this.getClient().getInfo().getListaSolicitudes()) {
-                                    ClientInfo info = this.getServer().obtenerClienteInfo(usr);
-                                    if (info.getIdGrupo() != null && info.getIdGrupo().equals(clientInfo.getIdGrupo())) {
-                                        this.getClient().getInfo().getListaSolicitudes().remove(usr);
-                                        this.getServer().actualizarClienteInfo(this.getClient().getInfo());
-                                    }
-                                }
                                 // Actualización de datos en servidor
                                 this.getServer().actualizarClienteInfo(this.getClient().getInfo());
                                 this.getServer().actualizarClienteInfo(clientInfo);
@@ -169,6 +179,22 @@ public class PrincipalController extends AbstractVentana {
                 } else {
                     listaSolicitudes.setItems(FXCollections.observableList(new ArrayList<>()));
                 }
+
+
+                // Agregar el evento de selección para la ListView de amigos
+                listaAmigos.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        // Extrae el nombre del amigo seleccionado
+                        String amigoSeleccionado = newValue.split(" ")[0];
+
+                        // Llamar al método para abrir la ventana correspondiente
+                        openAmigoView(amigoSeleccionado);
+
+                        // Restablece la selección a nula después de abrir la ventana
+                        Platform.runLater(() -> listaAmigos.getSelectionModel().clearSelection());
+                    }
+                });
+
 
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
@@ -250,15 +276,6 @@ public class PrincipalController extends AbstractVentana {
             controller.setClient(this.getClient());
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-
-    private void handleWindowClose() throws RemoteException {
-        // Cuando la ventana se cierra, se establece setOnline a false
-        if (this.getClient() != null && this.getClient().getInfo() != null) {
-            this.getClient().getInfo().setOnline(false);  // Establece el estado de "online" a false
-            this.getServer().actualizarClienteInfo(this.getClient().getInfo());
         }
     }
 
