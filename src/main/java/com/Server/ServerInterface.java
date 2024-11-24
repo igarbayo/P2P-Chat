@@ -7,6 +7,7 @@ import com.Client.ClientInfo;
 import com.Client.ClientInterface;
 
 import java.rmi.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,10 +30,11 @@ public interface ServerInterface extends Remote {
 
     /**
      *
-     * @param cliente
+     * @param clientInfo
      * @throws RemoteException
      */
-    public void anadirCliente(Client cliente) throws RemoteException;
+    public void anadirCliente(ClientInfo clientInfo) throws RemoteException;
+    //public void anadirCliente(Client cliente) throws RemoteException;
 
     /**
      *
@@ -50,12 +52,21 @@ public interface ServerInterface extends Remote {
      */
     public List<ClientInfo> obtenerAmigos(Client cliente) throws RemoteException;
 
+
     /**
      *
-     * @param idGrupo
+     *
+     * @return
      * @throws RemoteException
      */
-    public void actualizarGrupoAmistad(Integer idGrupo) throws RemoteException;
+    public List<String> obtenerListaClientes() throws RemoteException;
+
+    /**
+     *
+     *
+     * @throws RemoteException
+     */
+    public void actualizarGrupoAmistad() throws RemoteException;
 
     /**
      *
@@ -66,6 +77,6 @@ public interface ServerInterface extends Remote {
     public void notificar(List<Client> clientes, String mensaje) throws RemoteException;
 
 
-    public void anadirClienteEnLinea(ClientInterface cliente) throws RemoteException;
+    public void anadirClienteEnLinea(ClientInfo clientInfo) throws RemoteException;
 
 } // end interface

@@ -1,13 +1,19 @@
 package com.Client;
 
+import com.Server.ServerInterface;
+
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
+
+//Serializable
 public class Client extends UnicastRemoteObject implements ClientInterface, Serializable {
     private static final long serialVersionUID = 1L;
     // Atributos
@@ -49,6 +55,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         this.chats = chats;
     }
 
+
     // Constructor
     public Client() throws RemoteException {
         super();
@@ -87,15 +94,23 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
     // Método para notificar a otros clientes que un nuevo cliente se ha conectado
-    private void notificarAClientesConectados() {
+    private void notificarAClientesConectados() throws RemoteException, MalformedURLException, NotBoundException {
         // Aquí, en lugar de un registro manual, puedes usar un servidor para obtener todas las referencias remotas de clientes conectados
         // Este es un ejemplo simple donde se asume que ya tienes la lista de clientes conectados.
-        try {
-            Client clienteRemoto = (Client) Naming.lookup("rmi://localhost/clienteRemoto");
-            clienteRemoto.notificarConexion(info.getUsuario());  // Notificamos al cliente remoto
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<String> listaClientesConectados = new ArrayList<>();
+        ServerInterface servidor=(ServerInterface) Naming.lookup("rmi://localhost"+":"+ puerto+"/server");
+        listaClientesConectados=servidor.obtenerListaClientes();
+        for (String usuarioRemoto : listaClientesConectados) {
+            try {
+                ClientInterface clienteRemoto = (Client) Naming.lookup("rmi://localhost/"+usuarioRemoto);
+                //clienteRemoto.notificarConexion(this.info.getUsuario());  // Notificamos al cliente remoto
+                //falta clienteRemotoRecibirNotificacion
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
+
     }
 
     public boolean enviarMensaje(Client clientDestino, String contenido) {
@@ -205,6 +220,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
+
     @Override
     public void recibirMensaje(Mensaje mensaje) throws RemoteException {
         Optional<Chat> chat = this.obtenerChat(mensaje.getClienteOrigen());
@@ -216,22 +232,70 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     @Override
     public void notificarConexion(String username) throws RemoteException {
-
+        // Si el usuario está en la lista de amigos, actualizamos su estado a conectado
+        if (this.info.getListaAmigos().contains(username)) {
+            try {
+                // Buscamos el cliente en el registro RMI
+                ClientInterface clienteRemoto = (ClientInterface) Naming.lookup("rmi://" + IP + ":" + puerto + "/" + username);
+                // Si el cliente existe en el registro, significa que está conectado
+                if (clienteRemoto != null) {
+                    //faltaria algo para recibirNotificacion. clienteRemoto.recibirNotificacion o clienteRemotoRecibirNotificacion
+                    System.out.println("El usuario " + this.getInfo().getUsuario() + " se ha conectado");
+                }
+            } catch (Exception e) {
+                System.err.println("Error al notificar conexión del usuario " + username);
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void notificarDesconexion(String username) throws RemoteException {
+        // Si el usuario está en la lista de amigos, actualizamos su estado a desconectado
+        if (this.info.getListaAmigos().contains(username)) {
+            try {
+                ClientInterface clienteRemoto = (ClientInterface) Naming.lookup("rmi://" + IP + ":" + puerto + "/" + username);
+                //faltaria algo como recibirNotificacionDesconexion
+                System.out.println("El usuario " + this.getInfo().getUsuario() + " se ha desconectado");
 
+            } catch (Exception e) {
+                System.err.println("Error al notificar desconexión del usuario " + username);
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void recibirSolicitudAmistad(String fromUser) throws RemoteException {
-
+        if (fromUser != null && !this.info.getListaAmigos().contains(fromUser)) {
+            // Añadimos el usuario a la lista de solicitudes pendientes
+            this.info.getListaSolicitudes().add(fromUser);
+            System.out.println("Nueva solicitud de amistad recibida de: " + fromUser);
+        }
     }
 
     @Override
     public void confirmarAmistad(String username) throws RemoteException {
+        if (username != null) {
+            try {
+                // Añadir el usuario a la lista de amigos si no está ya
+                if (!this.info.getListaAmigos().contains(username)) {
+                    this.info.getListaAmigos().add(username);
 
+                    // Crear un nuevo chat con el usuario
+                    ClientInterface clienteRemoto = (ClientInterface) Naming.lookup("rmi://" + IP + ":" + puerto + "/" + username);
+                    //falta algo clienteRemoto.RecibirSolicitudAceptada.
+                    /*if (clienteRemoto != null) {
+                        this.crearChat(((Client)clienteRemoto).getInfo());
+                    }*/
+
+                    System.out.println("Amistad confirmada con: " + username);
+                }
+            } catch (Exception e) {
+                System.err.println("Error al confirmar amistad con " + username);
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -248,3 +312,4 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         return Objects.hash(super.hashCode(), info);
     }
 }
+

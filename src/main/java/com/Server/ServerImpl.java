@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * This class implements the remote interface SomeInterface.*/
 public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
-    private List<ClientInterface> clientesEnLinea;
+    private List<Client> clientesEnLinea;
     private Map<String, ClientInfo> listaClientes;
     //private Map<Client, List<Client>> listaSolicitudes;
 
@@ -93,7 +93,18 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return false;
     }
 
-    public void anadirCliente(Client cliente) throws RemoteException {
+    public void anadirCliente(ClientInfo clientInfo) throws RemoteException {
+        if (clientInfo == null || clientInfo.getUsuario() == null) {
+            throw new IllegalArgumentException("La información del cliente o su usuario no pueden ser nulos.");
+        }
+        String usuario = clientInfo.getUsuario();
+        if (listaClientes.containsKey(usuario)) {
+            throw new IllegalArgumentException("El cliente con el usuario '" + usuario + "' ya está registrado.");
+        }
+        listaClientes.put(usuario, clientInfo);
+    }
+
+    /*public void anadirCliente(Client cliente) throws RemoteException {
         if (cliente == null || cliente.getInfo() == null || cliente.getInfo().getUsuario() == null) {
             throw new IllegalArgumentException("El cliente, su información o su usuario no pueden ser nulos.");
         }
@@ -104,7 +115,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
         // Agregar el ClientInfo al mapa
         listaClientes.put(usuario, cliente.getInfo());
-    }
+    }*/
 
     public List<ClientInfo> obtenerAmigosEnLinea(Client cliente) throws RemoteException {
         List<ClientInfo> lista = this.obtenerAmigos(cliente);
@@ -134,19 +145,111 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         // Devolver la lista de amigos
         return amigos;
     }
+    public ArrayList<String> obtenerListaClientes() throws RemoteException {
+        ArrayList<String> clientes = new ArrayList<>();
+        for (Client users:clientesEnLinea){
+            clientes.add(users.getInfo().getUsuario());
+        }
+        return clientes;
+    }
 
 
 
 
 
-    public void actualizarGrupoAmistad(Integer idGrupo) throws RemoteException {
+    public void actualizarGrupoAmistad() throws RemoteException {
+        // Lista para almacenar clientes que necesitan ser notificados
+        List<Client> clientesANotificar = new ArrayList<>();
 
+        // Recorrer todos los clientes en línea y actualizar sus listas de amigos
+        for (Client cliente : clientesEnLinea) {
+            try {
+                // Obtener la información actual del cliente
+                ClientInfo clienteInfo = cliente.getInfo();
+                if (clienteInfo != null) {
+                    // Obtener la información más actualizada del servidor
+                    ClientInfo infoActualizada = listaClientes.get(clienteInfo.getUsuario());
+
+                    // Verificar si hay cambios en la lista de amigos
+                    if (!clienteInfo.getListaAmigos().equals(infoActualizada.getListaAmigos())) {
+                        // Crear un cliente temporal para la notificación
+                        Client clienteTemp = new Client();
+                        clienteTemp.setInfo(infoActualizada);
+                        clientesANotificar.add(clienteTemp);
+
+                        // Actualizar la información del cliente en línea
+                        clienteInfo.setListaAmigos(new ArrayList<>(infoActualizada.getListaAmigos()));
+                    }
+                }
+            } catch (RemoteException e) {
+                // Si hay un error al comunicarse con un cliente, continuamos con el siguiente
+                e.printStackTrace();
+            }
+        }
+
+        // Si hay clientes para notificar, enviamos las notificaciones
+        if (!clientesANotificar.isEmpty()) {
+            String mensaje = "Tu lista de amigos ha sido actualizada";
+            notificar(clientesANotificar, mensaje);
+        }
     }
 
     public void notificar(List<Client> clientes, String mensaje) throws RemoteException {
+        if (clientes == null || mensaje == null) {
+            throw new IllegalArgumentException("La lista de clientes y el mensaje no pueden ser nulos");
+        }
 
+        // Lista para almacenar los errores de notificación
+        List<String> errores = new ArrayList<>();
+
+        // Intentar notificar a cada cliente en la lista
+        for (Client cliente : clientes) {
+            try {
+                ClientInfo clienteInfo = cliente.getInfo();
+                if (clienteInfo != null && clienteInfo.isOnline()) {
+                    // Buscar la interfaz remota del cliente
+                    Optional<ClientInterface> clienteInterface = clientesEnLinea.stream()
+                            .filter(c -> {
+                                try {
+                                    return c.getInfo().getUsuario().equals(clienteInfo.getUsuario());
+                                } catch (RemoteException e) {
+                                    return false;
+                                }
+                            })
+                            .findFirst();
+
+                    // Si encontramos la interfaz del cliente, enviamos la notificación
+                    if (clienteInterface.isPresent()) {
+                        clienteInterface.get().recibirNotificacion(mensaje);
+                    }
+                }
+            } catch (RemoteException e) {
+                // Registrar el error para este cliente específico
+                errores.add("Error al notificar al cliente " + cliente.getInfo().getUsuario() + ": " + e.getMessage());
+            }
+        }
+
+        // Si hubo errores, lanzar una excepción con todos los errores acumulados
+        if (!errores.isEmpty()) {
+            throw new RemoteException("Errores durante la notificación:\n" + String.join("\n", errores));
+        }
     }
 
+
+    public void anadirClienteEnLinea(ClientInfo clientInfo) throws RemoteException {
+        if (clientInfo == null || clientInfo.getUsuario() == null) {
+            throw new IllegalArgumentException("La información del cliente o su usuario no pueden ser nulos.");
+        }
+        Client cliente = new Client();
+        cliente.setInfo(clientInfo);
+        // Verificar si el cliente ya existe en el mapa
+        if (clientesEnLinea.contains(cliente)) {
+            throw new IllegalArgumentException("El cliente ya está registrado online.");
+        }
+        // Agregar el ClientInterface
+        clientesEnLinea.add(cliente);
+    }
+    /*
     public void anadirClienteEnLinea(ClientInterface cliente) throws RemoteException {
         if (cliente == null) {
             throw new IllegalArgumentException("El cliente no puede ser nulo.");
@@ -157,7 +260,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
         // Agregar el ClientInterface
        clientesEnLinea.add(cliente);
-    }
+    }*/
 
 
     /*

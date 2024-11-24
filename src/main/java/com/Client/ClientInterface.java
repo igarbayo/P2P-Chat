@@ -4,6 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface ClientInterface extends Remote {
+
     // Método que se llama para enviar un mensaje a otro cliente
     void recibirMensaje(Mensaje mensaje) throws RemoteException;
 
