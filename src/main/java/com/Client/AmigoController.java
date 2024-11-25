@@ -52,27 +52,6 @@ public class AmigoController extends AbstractVentana{
 
             // Código de inicialización aquí
 
-            // Configurar un shutdown hook para manejar la desconexión cuando se cierra el programa con SIGINT
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    handleWindowClose();
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
-
-            // Obtenemos el stage actual
-            Stage stage = (Stage) usernameAmigo.getScene().getWindow();
-
-            // Configuramos el cierre seguro cuando se pulsa la X
-            stage.setOnCloseRequest(event -> {
-                try {
-                    handleWindowClose();
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
             // Mostramos el nombre del usuario conectado
             usernameAmigo.setText(amigo);
 

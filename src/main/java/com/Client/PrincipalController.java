@@ -101,14 +101,14 @@ public class PrincipalController extends AbstractVentana {
             try {
                 // Manejo de lista de amigos
                 List<String> list;
-                List<ClientInfo> amigos = null;
+                List<ClientInfo> amigos = new ArrayList<>();
                 if (this.getServer() != null && this.getClient() != null) {
-                    amigos = this.getServer().obtenerAmigos(this.getClient());
+                    amigos = this.getServer().obtenerAmigos(this.getClient().getInfo());
                 }
 
                 //System.out.println("Lista de amigos: " + amigos);
 
-                if (amigos != null) {
+                if (!amigos.isEmpty()) {
                     // Construir la lista de nombres con estados
                     list = amigos.stream()
                             .map(amigo -> amigo.getUsuario() + (amigo.isOnline() ? " [Online]" : " [Offline]"))
@@ -196,7 +196,7 @@ public class PrincipalController extends AbstractVentana {
                 });
 
 
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 

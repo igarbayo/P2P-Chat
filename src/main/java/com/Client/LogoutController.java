@@ -37,6 +37,7 @@ public class LogoutController extends AbstractVentana{
     @Override
     public void initialize(URL url, ResourceBundle resources) {
         Platform.runLater(() -> {
+            System.out.println("LOGOUT");
             System.out.println(this.getClient().getInfo());
         });
     }
@@ -59,6 +60,10 @@ public class LogoutController extends AbstractVentana{
             InicioController controller = fxmlLoader.getController();
             controller.setServer(this.getServer());
             controller.setClient(this.getClient());
+            controller.setIP(this.getClient().getIP());
+            controller.setPuerto(this.getClient().getPuerto());
+
+            this.getClient().cerrarConexion();
 
             // Ponemos vacia la ClientInfo de la instancia de Client actual
             this.getClient().getInfo().setOnline(false);

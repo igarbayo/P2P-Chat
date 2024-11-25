@@ -15,12 +15,10 @@ import java.util.stream.Collectors;
 
 //Serializable
 public class Client extends UnicastRemoteObject implements ClientInterface, Serializable {
-    private static final long serialVersionUID = 1L;
+    //private static final long serialVersionUID = 1L;
+
     // Atributos
     private ClientInfo info;
-    // los chats se almacenan en cada instancia de cliente de forma local, cada vez que se arranca
-    // se borran cuando se cierra la instancia del cliente, puesto que la app tampoco deja mandar
-    // mensajes si un cliente no está conectado
     private List<Chat> chats;
     private String IP;
     private int puerto;
@@ -28,19 +26,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public String getIP() {
         return IP;
     }
-
     public void setIP(String IP) {
         this.IP = IP;
     }
-
     public int getPuerto() {
         return puerto;
     }
-
     public void setPuerto(int puerto) {
         this.puerto = puerto;
     }
-
     // Getters y Setters
     public ClientInfo getInfo() {
         return info;
@@ -68,13 +62,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public void registrarCliente(String ip, int puerto) throws RemoteException {
         try {
             // Registrar el objeto remoto en el registro RMI con el nombre de usuario
-            Naming.rebind("rmi://" + ip + ":" + puerto + "/" + info.getUsuario(), this);
+            String URL = "rmi://" + ip + ":" + puerto + "/" + info.getUsuario();
+            System.out.println(URL);
+            Naming.rebind(URL, this);
             System.out.println("Cliente '" + info.getUsuario() + "' registrado en RMI.");
             this.IP = ip;
             this.puerto = puerto;
 
             // Notificar a los demás clientes sobre la conexión
-            notificarAClientesConectados();
+            //notificarAClientesConectados();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -82,12 +78,19 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     public void cerrarConexion() throws RemoteException {
         try {
-            // Registrar el objeto remoto en el registro RMI con el nombre de usuario
-            Naming.unbind("rmi://" + this.IP + ":" + this.puerto + "/" + info.getUsuario());
-            System.out.println("Cliente '" + info.getUsuario() + "' desregistrado en RMI.");
+            System.out.println(this.IP);
+            System.out.println(this.puerto);
+            System.out.println(this.info);
+            // Desregistrar el objeto remoto en el registro RMI con el nombre de usuario
+            if (this.IP != null && this.info!=null && this.info.getUsuario()!=null) {
+                String URL = "rmi://" + this.IP + ":" + this.puerto + "/" + this.info.getUsuario();
+                System.out.println(URL);
+                Naming.unbind(URL);
+                System.out.println("Cliente '" + info.getUsuario() + "' desregistrado en RMI.");
 
-            // Notificar a los demás clientes sobre la conexión
-            notificarAClientesConectados();
+                // Notificar a los demás clientes sobre la conexión
+                //notificarAClientesConectados();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,8 +101,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         // Aquí, en lugar de un registro manual, puedes usar un servidor para obtener todas las referencias remotas de clientes conectados
         // Este es un ejemplo simple donde se asume que ya tienes la lista de clientes conectados.
         List<String> listaClientesConectados = new ArrayList<>();
-        ServerInterface servidor=(ServerInterface) Naming.lookup("rmi://localhost"+":"+ puerto+"/server");
-        listaClientesConectados=servidor.obtenerListaClientes();
+        ServerInterface servidor=(ServerInterface) Naming.lookup("rmi://"+ IP + ":"+ puerto+"/server");
+        listaClientesConectados=obtenerNombresDeUsuario(servidor.obtenerAmigosEnLinea(this));
         for (String usuarioRemoto : listaClientesConectados) {
             try {
                 ClientInterface clienteRemoto = (Client) Naming.lookup("rmi://localhost/"+usuarioRemoto);

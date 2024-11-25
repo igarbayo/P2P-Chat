@@ -57,15 +57,14 @@ public class ClientInfo implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ClientInfo that = (ClientInfo) o;
-        return Objects.equals(usuario, that.usuario); // Compara por el nombre de usuario
+        return Objects.equals(usuario, that.usuario);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(usuario); // Genera un hash basado en el nombre de usuario
+        return Objects.hashCode(usuario);
     }
 
     @Override

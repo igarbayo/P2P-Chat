@@ -118,7 +118,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }*/
 
     public List<ClientInfo> obtenerAmigosEnLinea(Client cliente) throws RemoteException {
-        List<ClientInfo> lista = this.obtenerAmigos(cliente);
+        List<ClientInfo> lista = this.obtenerAmigos(cliente.getInfo());
         for (ClientInfo info : lista) {
             if (!info.isOnline()) {
                 lista.remove(info);
@@ -130,15 +130,17 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return lista;
     }
 
-    public List<ClientInfo> obtenerAmigos(Client cliente) throws RemoteException {
-        if (cliente == null || cliente.getInfo() == null) {
+    public List<ClientInfo> obtenerAmigos(ClientInfo cliente) throws RemoteException {
+        if (cliente == null) {
             return List.of(); // Si el cliente o su información es nula, devuelve una lista vacía
         }
 
         // Lista para almacenar los amigos
         List<ClientInfo> amigos = new ArrayList<>();
 
-        for (String amigo_usr : cliente.getInfo().getListaAmigos()) {
+        System.out.println("He llegado a 1");
+
+        for (String amigo_usr : cliente.getListaAmigos()) {
             amigos.add(obtenerClienteInfo(amigo_usr));
         }
 
@@ -204,28 +206,19 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
         // Intentar notificar a cada cliente en la lista
         for (Client cliente : clientes) {
-            try {
-                ClientInfo clienteInfo = cliente.getInfo();
-                if (clienteInfo != null && clienteInfo.isOnline()) {
-                    // Buscar la interfaz remota del cliente
-                    Optional<ClientInterface> clienteInterface = clientesEnLinea.stream()
-                            .filter(c -> {
-                                try {
-                                    return c.getInfo().getUsuario().equals(clienteInfo.getUsuario());
-                                } catch (RemoteException e) {
-                                    return false;
-                                }
-                            })
-                            .findFirst();
+            ClientInfo clienteInfo = cliente.getInfo();
+            if (clienteInfo != null && clienteInfo.isOnline()) {
+                // Buscar la interfaz remota del cliente
+                Optional<Client> clienteInterface = clientesEnLinea.stream()
+                        .filter(c -> {
+                            return c.getInfo().getUsuario().equals(clienteInfo.getUsuario());
+                        })
+                        .findFirst();
 
-                    // Si encontramos la interfaz del cliente, enviamos la notificación
-                    if (clienteInterface.isPresent()) {
-                        clienteInterface.get().recibirNotificacion(mensaje);
-                    }
+                // Si encontramos la interfaz del cliente, enviamos la notificación
+                if (clienteInterface.isPresent()) {
+                    //clienteInterface.get().recibirNotificacion(mensaje);
                 }
-            } catch (RemoteException e) {
-                // Registrar el error para este cliente específico
-                errores.add("Error al notificar al cliente " + cliente.getInfo().getUsuario() + ": " + e.getMessage());
             }
         }
 

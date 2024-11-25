@@ -95,6 +95,8 @@ public class InicioController extends AbstractVentana {
                         // Pasa la instancia del servidor y del cliente
                         PrincipalController controller = fxmlLoader.getController();
                         controller.setServer(this.getServer());
+                        client.setIP(IP);
+                        client.setPuerto(puerto);
                         this.setClient(client);
                         controller.setClient(client);
                         fxmlLoader.setController(controller);
@@ -171,6 +173,8 @@ public class InicioController extends AbstractVentana {
 
             PrincipalController controller = fxmlLoader.getController();
             controller.setServer(server);
+            client.setIP(IP);
+            client.setPuerto(puerto);
             this.setClient(client);
             controller.setClient(client);
 
