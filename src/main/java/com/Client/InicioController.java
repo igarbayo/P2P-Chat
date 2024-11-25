@@ -167,6 +167,7 @@ public class InicioController extends AbstractVentana {
             // Añadir a la lista de clientes en línea
             server.anadirClienteEnLinea(info);
 
+
             // Cargar la ventana principal
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
@@ -175,6 +176,7 @@ public class InicioController extends AbstractVentana {
             controller.setServer(server);
             client.setIP(IP);
             client.setPuerto(puerto);
+
             this.setClient(client);
             controller.setClient(client);
 

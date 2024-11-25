@@ -18,7 +18,7 @@
       </ScrollPane>
       <Label layoutX="27.0" layoutY="28.0" text="Amigo" />
       <Label fx:id="usernameAmigo" layoutX="86.0" layoutY="28.0" text="username" />
-      <Button fx:id="botonDejar" layoutX="466.0" layoutY="24.0" mnemonicParsing="false" text="Dejar amistad" textAlignment="RIGHT" />
+      <Button fx:id="botonDejar" layoutX="466.0" layoutY="24.0" mnemonicParsing="false" onAction="#onbotonDejar" text="Dejar amistad" textAlignment="RIGHT" />
       <TextArea layoutX="27.0" layoutY="342.0" prefHeight="45.0" prefWidth="460.0" promptText="Escriba el mensaje" />
       <Button fx:id="botonEnviar" layoutX="505.0" layoutY="353.0" mnemonicParsing="false" text="Enviar" />
    </children>

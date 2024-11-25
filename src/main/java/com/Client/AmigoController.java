@@ -1,6 +1,7 @@
 package com.Client;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -85,5 +86,31 @@ public class AmigoController extends AbstractVentana{
 
 
         });
+    }
+
+    public void onbotonDejar(ActionEvent actionEvent) {
+        try {
+            // Obtener la información del amigo
+            ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(amigo);
+
+            // Eliminar la amistad
+            this.getClient().eliminarAmigo(amigoInfo);
+
+
+            // Actualizar la información en el servidor para ambos usuarios
+            this.getServer().actualizarClienteInfo(this.getClient().getInfo());
+            this.getServer().actualizarClienteInfo(amigoInfo);
+
+            // Obtener el stage actual para cerrarlo
+            Stage currentStage = (Stage) botonDejar.getScene().getWindow();
+
+            // Cerrar la ventana actual
+            currentStage.close();
+            this.recargar(currentStage, "PrincipalCliente-view.fxml");
+
+
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

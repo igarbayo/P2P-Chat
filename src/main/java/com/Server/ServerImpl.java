@@ -102,6 +102,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             throw new IllegalArgumentException("El cliente con el usuario '" + usuario + "' ya está registrado.");
         }
         listaClientes.put(usuario, clientInfo);
+
     }
 
     /*public void anadirCliente(Client cliente) throws RemoteException {
@@ -191,11 +192,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
         // Si hay clientes para notificar, enviamos las notificaciones
         if (!clientesANotificar.isEmpty()) {
-            String mensaje = "Tu lista de amigos ha sido actualizada";
-            notificar(clientesANotificar, mensaje);
+            //String mensaje = "Tu lista de amigos ha sido actualizada";
+            //habría que hacerlo desde confirmacion aceptada notificar(clientesANotificar, mensaje);
         }
     }
 
+
+    //No funciona bien esta funcion. Habría que pillar la conexion. Si no se pueden enviar las notificaciones directamente desde los clientes.
     public void notificar(List<Client> clientes, String mensaje) throws RemoteException {
         if (clientes == null || mensaje == null) {
             throw new IllegalArgumentException("La lista de clientes y el mensaje no pueden ser nulos");
@@ -217,6 +220,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
                 // Si encontramos la interfaz del cliente, enviamos la notificación
                 if (clienteInterface.isPresent()) {
+                    clienteInterface.get().recibirNotificacion(mensaje);
                     //clienteInterface.get().recibirNotificacion(mensaje);
                 }
             }
@@ -241,6 +245,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
         // Agregar el ClientInterface
         clientesEnLinea.add(cliente);
+
     }
     /*
     public void anadirClienteEnLinea(ClientInterface cliente) throws RemoteException {

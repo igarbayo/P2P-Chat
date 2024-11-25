@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 
 public interface ClientInterface extends Remote {
 
+    void setPrincipalController(PrincipalController principalController) throws RemoteException;
     // Método que se llama para enviar un mensaje a otro cliente
     void recibirMensaje(Mensaje mensaje) throws RemoteException;
 
@@ -19,4 +20,7 @@ public interface ClientInterface extends Remote {
 
     // Método para recibir confirmación de amistad
     void confirmarAmistad(String username) throws RemoteException;
+
+    //Metodo para recibir informacion del server
+    void recibirNotificacion(String mensaje)throws RemoteException;
 }

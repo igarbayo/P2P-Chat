@@ -7,18 +7,19 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
 import javafx.event.ActionEvent;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -37,6 +38,13 @@ public class PrincipalController extends AbstractVentana {
     private Button botonLogout;
     @FXML
     private Label usernameLabel;
+    @FXML
+    private transient TextFlow consola;
+    @FXML
+    private transient ScrollPane scrollPane;
+
+    private static final int MAX_MESSAGES = 100;
+
 
 
     private void openAmigoView(String amigoSeleccionado) {
@@ -97,6 +105,9 @@ public class PrincipalController extends AbstractVentana {
 
             // Mostramos el nombre del usuario conectado
             usernameLabel.setText(this.getClient().getInfo().getUsuario());
+            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+            printEnConsola("Bienvenido: Iniciado correctamente");
 
             try {
                 // Manejo de lista de amigos
@@ -140,12 +151,14 @@ public class PrincipalController extends AbstractVentana {
                                 throw new RuntimeException(e);
                             }
                             this.getClient().aceptarSolicitudAmistad(clientInfo);
+
                             try {
                                 // Actualización de datos en servidor
                                 this.getServer().actualizarClienteInfo(this.getClient().getInfo());
                                 this.getServer().actualizarClienteInfo(clientInfo);
                                 // recargar la ventana gráfica
                                 this.recargar(stage, "PrincipalCliente-view.fxml");
+
                             } catch (RemoteException e) {
                                 throw new RuntimeException(e);
                             }
@@ -277,6 +290,28 @@ public class PrincipalController extends AbstractVentana {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+    }
+    //Metodo para imprimir ciertas notificaciones en la consola
+    @FXML
+    public void printEnConsola(String mensaje){
+
+        //Coge el tiempo actual para imprimirlo en formato texto
+        LocalTime tiempoActual = LocalTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String tiempoFormateado=tiempoActual.format(formato);
+
+        //Formatea el texto
+        Text text = new Text("["+tiempoFormateado+"] "+mensaje+"\n");
+
+        //Añado un objeto texto a la consola.
+        //borra el texto antiguo
+        consola.getChildren().add(0,text);
+        if(consola.getChildren().size() > MAX_MESSAGES){
+            consola.getChildren().remove(MAX_MESSAGES);
+        }
+
+
     }
 
 }

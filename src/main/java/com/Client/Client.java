@@ -1,7 +1,7 @@
 package com.Client;
 
 import com.Server.ServerInterface;
-
+import javafx.application.Platform;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -48,7 +48,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     protected void setChats(List<Chat> chats) {
         this.chats = chats;
     }
-
+    private PrincipalController principalController;
 
     // Constructor
     public Client() throws RemoteException {
@@ -96,6 +96,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         }
     }
 
+    //Creo que esta ya no nos hace falta, se notifica a los clientes desde el servidor en añadirCliene llamo a notificar.
     // Método para notificar a otros clientes que un nuevo cliente se ha conectado
     private void notificarAClientesConectados() throws RemoteException, MalformedURLException, NotBoundException {
         // Aquí, en lugar de un registro manual, puedes usar un servidor para obtener todas las referencias remotas de clientes conectados
@@ -152,9 +153,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
-
-
-
     /**
      *
      * @param
@@ -171,11 +169,23 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
             // 3. Borrar la solicitud de la lista de 'this'
             this.info.getListaSolicitudes().remove(clienteSolicitante.getUsuario());
-
             // (Opcional) Confirmación
+
             System.out.println("Solicitud de amistad aceptada: ");
         } else {
             // Si los objetos son nulos, manejar el error
+            System.out.println("Error: Cliente o información no válida.");
+        }
+    }
+
+    public void eliminarAmigo(ClientInfo amigo) {
+        if (amigo != null && this.info != null) {
+            //Elimino el usuarioAmigo del amigo
+            amigo.getListaAmigos().remove(this.getInfo().getUsuario());
+            //Elimino el amigo del usuario
+            this.getInfo().getListaAmigos().remove(amigo.getUsuario());
+            System.out.println("Amigo eliminado: " + amigo.getUsuario());
+        }else{
             System.out.println("Error: Cliente o información no válida.");
         }
     }
@@ -223,6 +233,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
+    @Override
+    public void setPrincipalController(PrincipalController principalController) throws RemoteException {
+        this.principalController=principalController;
+    }
 
     @Override
     public void recibirMensaje(Mensaje mensaje) throws RemoteException {
@@ -291,6 +305,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
                     /*if (clienteRemoto != null) {
                         this.crearChat(((Client)clienteRemoto).getInfo());
                     }*/
+                    clienteRemoto.recibirNotificacion("Amistad confirmada con"+username);
 
                     System.out.println("Amistad confirmada con: " + username);
                 }
@@ -299,6 +314,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
                 e.printStackTrace();
             }
         }
+    }
+
+
+    @Override
+    public void recibirNotificacion(String mensaje) throws RemoteException {
+        Platform.runLater(() -> principalController.printEnConsola(mensaje));
     }
 
 
