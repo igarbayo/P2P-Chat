@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.Server.ServerInterface;
 
 
 
@@ -22,6 +23,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     private List<Chat> chats;
     private String IP;
     private int puerto;
+    private Map<String, ClientInterface> amigosOnLine;
+
 
     public String getIP() {
         return IP;
@@ -50,6 +53,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
     private PrincipalController principalController;
 
+    public PrincipalController getPrincipalController() {
+        return principalController;
+    }
+
     public Map<String, ClientInterface> getAmigosOnLine() {
         return amigosOnLine;
     }
@@ -77,6 +84,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             this.IP = ip;
             this.puerto = puerto;
 
+            //ServerInterface server = (ServerInterface) Naming.lookup("rmi://" + ip + ":" + puerto + "/" + server);
             // Notificar a los demás clientes sobre la conexión
             //notificarAClientesConectados();
         } catch (Exception e) {
@@ -204,9 +212,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             // 2. Añadir usuario(clienteSolicitante) a this.listaAmigos
             this.getInfo().getListaAmigos().add(clienteSolicitante.getUsuario());
 
-            // 3. Borrar la solicitud de la lista de 'this'
-            this.info.getListaSolicitudes().remove(clienteSolicitante.getUsuario());
+            // 3. Borrar la solicitud de la lista de 'this' (controller)
+
             // (Opcional) Confirmación
+
 
             System.out.println("Solicitud de amistad aceptada: ");
         } else {
@@ -228,15 +237,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
-    public void rechazarSolicitudAmistad(ClientInfo clienteSolicitante) {
-        // Eliminar la solicitud de la lista de solicitudes
-        this.info.getListaSolicitudes().remove(clienteSolicitante.getUsuario());
-    }
+    public List<String> obtenerNombresDeUsuario(List<ClientInterface> listaClientInterface) throws RemoteException{
+        List<String> lista = new ArrayList<>();
+        for (ClientInterface client : listaClientInterface) {
+            if (client.getNombre()!=null) {
+                lista.add(client.getNombre());
+            }
+        }
+        return lista;
 
-    public List<String> obtenerNombresDeUsuario(List<ClientInfo> listaClientInfo) {
-        return listaClientInfo.stream()  // Convierte la lista en un stream
-                .map(ClientInfo::getUsuario) // Mapea cada ClientInfo a su atributo usuario
-                .collect(Collectors.toList()); // Recoge los resultados en una lista
     }
 
 
@@ -272,7 +281,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
 
     public void setPrincipalController(PrincipalController principalController) throws RemoteException {
-        this.principalController=principalController;
+        if (principalController!=null) {
+            this.principalController=principalController;
+        }
     }
 
     @Override
@@ -316,15 +327,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
                 System.err.println("Error al notificar desconexión del usuario " + username);
                 e.printStackTrace();
             }
-        }
-    }
-
-    @Override
-    public void recibirSolicitudAmistad(String fromUser) throws RemoteException {
-        if (fromUser != null && !this.info.getListaAmigos().contains(fromUser)) {
-            // Añadimos el usuario a la lista de solicitudes pendientes
-            this.info.getListaSolicitudes().add(fromUser);
-            System.out.println("Nueva solicitud de amistad recibida de: " + fromUser);
         }
     }
 

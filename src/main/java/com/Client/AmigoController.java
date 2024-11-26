@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -85,7 +86,7 @@ public class AmigoController extends AbstractVentana{
                 if (chat.isPresent()) {
                     chat.get().anadirMensaje(message);
                     this.getClient().actualizarChat(chat.get());
-                    this.getServer().actualizarClienteInfo(this.getClient().getInfo());
+                    this.getServer().actualizarClienteInfo(this.getClient());
                     for (Mensaje m : chat.get().getMensajes()) {
                         System.out.println(m);
                         addMessage(m.toString());
@@ -105,15 +106,19 @@ public class AmigoController extends AbstractVentana{
     public void onbotonDejar(ActionEvent actionEvent) {
         try {
             // Obtener la información del amigo
-            ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(amigo);
+            ClientInterface amigoInterface = this.getServer().getInterface(amigo);
+            ClientInfo amigoInfo = amigoInterface.getClientInfo();
 
             // Eliminar la amistad
             this.getClient().eliminarAmigo(amigoInfo);
-
+            // A mano en el destino
+            List<String> amigosDest = amigoInfo.getListaAmigos();
+            amigosDest.remove(this.getClient().getNombre());
+            amigoInterface.setListaAmigos(amigosDest);
 
             // Actualizar la información en el servidor para ambos usuarios
-            this.getServer().actualizarClienteInfo(this.getClient().getInfo());
-            this.getServer().actualizarClienteInfo(amigoInfo);
+            this.getServer().actualizarClienteInfo(this.getClient());
+            this.getServer().actualizarClienteInfo(amigoInterface);
 
             // Cargar el archivo FXML
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));

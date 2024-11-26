@@ -11,7 +11,6 @@ public class ClientInfo implements Serializable {
     private String usuario;
     private String contrasena;
     private List<String> listaAmigos;
-    private List<String> listaSolicitudes;
     private boolean online;
 
     // Getters y Setters
@@ -33,13 +32,7 @@ public class ClientInfo implements Serializable {
     public void setListaAmigos(List<String> listaAmigos) {
         this.listaAmigos = listaAmigos;
     }
-    public List<String> getListaSolicitudes() {
-        return listaSolicitudes;
-    }
-    public void setListaSolicitudes(List<String> listaSolicitudes) {
-        this.listaSolicitudes = listaSolicitudes;
-    }
-    public boolean isOnline() {
+   public boolean isOnline() {
         return online;
     }
     public void setOnline(boolean online) {
@@ -51,7 +44,6 @@ public class ClientInfo implements Serializable {
         this.usuario = usuario;
         this.contrasena = contrasena;
         this.listaAmigos = new ArrayList<>();
-        this.listaSolicitudes = new ArrayList<>();
         this.online = false;
     }
 
@@ -73,7 +65,6 @@ public class ClientInfo implements Serializable {
                 "\n\tusuario='" + usuario + '\'' +
                 ", \n\tcontrasena='" + contrasena + '\'' +
                 ", \n\tlistaAmigos=" + listaAmigos +
-                ", \n\tlistaSolicitudes=" + listaSolicitudes +
                 ", \n\tonline=" + online +
                 '}';
     }

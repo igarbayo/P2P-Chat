@@ -11,7 +11,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -25,7 +28,7 @@ public class SolicitudController extends AbstractVentana {
     @FXML
     private Button botonSolicitud;
 
-    private boolean err = true;
+    private boolean valido = true;
 
 
 
@@ -45,43 +48,33 @@ public class SolicitudController extends AbstractVentana {
         String username = nombreUsuario.getText();
 
         // Variable de mensaje de error
-        err = true;
+        valido = true;
 
         // FUncionamiento principal
         if (username !=null && !username.isEmpty()) {
             try {
-                err = this.getServer().existeCliente(username);
-                System.out.println(err);
-                errorText.setVisible(!err);
+                valido = this.getServer().existeCliente(username);
 
                 // Si existe el cliente
-                if (err) {
-                    // se envía la solicitud de amistad
-
+                if (valido) {
                     // Verificar si el destinatario existe en el servidor
-                    ClientInfo destinatario = this.getServer().obtenerClienteInfo(username);
-
-                    //System.out.println(destinatario);
-
-                    if (destinatario != null) {
+                    ClientInterface destinatario = this.getServer().getInterface(username);
+                    // Verificar que origen y destinatario no sean ya amigos
+                    if (destinatario != null && !this.getClient().getInfo().getListaAmigos().contains(destinatario.getNombre())) {
                         // Agregar esta solicitud a la lista de solicitudes del destinatario
-                        List<String> listaSolicitudes = destinatario.getListaSolicitudes();
-                        if (!listaSolicitudes.contains(this.getClient().getInfo().getUsuario())) { // Evitar duplicados
-                            listaSolicitudes.add(this.getClient().getInfo().getUsuario());
-                            destinatario.setListaSolicitudes(listaSolicitudes); // Asegúrate de actualizar la referencia
-                            this.getServer().actualizarClienteInfo(destinatario); // Actualiza en el servidor
-                            //System.out.println(this.getClient().getInfo());
-
-                            stage.close();
-                        }
+                        this.getServer().anadirSolicitud(this.getClient().getNombre(), destinatario.getNombre());
+                        stage.close();
+                    } else {
+                        valido = false;
                     }
+                    System.out.println(valido);
+                    errorText.setVisible(!valido);
                 }
 
-
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-
     }
+
 }

@@ -2,6 +2,8 @@ package com.Client;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 
 public interface ClientInterface extends Remote {
 
@@ -25,9 +27,6 @@ public interface ClientInterface extends Remote {
 
     // Método para recibir notificación de desconexión
     void notificarDesconexion(String username) throws RemoteException;
-
-    // Método para recibir notificación de solicitud de amistad
-    void recibirSolicitudAmistad(String fromUser) throws RemoteException;
 
     // Método para recibir confirmación de amistad
     void confirmarAmistad(String username) throws RemoteException;

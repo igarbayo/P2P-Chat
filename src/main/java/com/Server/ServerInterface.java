@@ -13,30 +13,27 @@ import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
-    public void notificarAmigos(ClientInfo client, String mensaje) throws RemoteException;
-    public ClientInterface obtenerInstanciaConInfo(ClientInfo clientInfo) throws RemoteException;
-    public void actualizarClienteInfo(ClientInfo clientInfo) throws RemoteException;
+    public void anadirSolicitud(String origen, String destino) throws RemoteException;
+    public void eliminarSolicitud(String origen, String destino) throws RemoteException;
+    public ClientInterface getInterface(String username) throws RemoteException;
+    public void notificarAmigos(ClientInterface client, String mensaje) throws RemoteException;
+    public void actualizarClienteInfo(ClientInterface clientInfo) throws RemoteException;
     public ClientInfo obtenerClienteInfo(String username) throws RemoteException;
-
-    public boolean existeCliente(ClientInfo clientInfo) throws RemoteException;
+    public List<String> getSolicitudes(ClientInterface client) throws RemoteException;
+    public boolean existeCliente(ClientInterface client) throws RemoteException;
 
     public boolean existeCliente(String username) throws RemoteException;
 
-    public boolean cargarDatos(Client client) throws RemoteException;
+    public void anadirCliente(ClientInterface client) throws RemoteException;
 
-    public void anadirCliente(ClientInfo clientInfo) throws RemoteException;
-
-    public void anadirClienteOnLine(Client client) throws RemoteException;
+    public void anadirClienteOnLine(ClientInterface client) throws RemoteException;
 
     public List<ClientInterface> obtenerAmigosEnLinea(ClientInterface cliente) throws RemoteException;
 
-    public List<ClientInfo> obtenerAmigos(ClientInfo cliente) throws RemoteException;
-
-    public List<String> obtenerListaClientes() throws RemoteException;
+    public List<String> obtenerAmigos(String usuario) throws RemoteException;
 
     public void actualizarGrupoAmistad() throws RemoteException;
 
-    public void notificar(List<ClientInfo> clientes, String mensaje) throws RemoteException;
-
+    public void notificar(List<ClientInterface> clientes, String mensaje) throws RemoteException;
 
 } // end interface
