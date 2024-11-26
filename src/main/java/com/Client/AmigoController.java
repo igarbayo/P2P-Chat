@@ -3,6 +3,8 @@ package com.Client;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -14,6 +16,15 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class AmigoController extends AbstractVentana{
+
+    // Atributo añadido para recargar
+    private Stage stagePrincipal;
+    public Stage getStagePrincipal() {
+        return stagePrincipal;
+    }
+    public void setStagePrincipal(Stage stagePrincipal) {
+        this.stagePrincipal = stagePrincipal;
+    }
 
     // Atributo añadido para Amigo
     private String amigo;
@@ -32,6 +43,9 @@ public class AmigoController extends AbstractVentana{
     private Button botonDejar;
     @FXML
     private Button botonEnviar;
+    @FXML
+    private Button botonVolver;
+
 
     // Método para agregar un nuevo mensaje al chat
     public void addMessage(String message) {
@@ -101,15 +115,40 @@ public class AmigoController extends AbstractVentana{
             this.getServer().actualizarClienteInfo(this.getClient().getInfo());
             this.getServer().actualizarClienteInfo(amigoInfo);
 
-            // Obtener el stage actual para cerrarlo
-            Stage currentStage = (Stage) botonDejar.getScene().getWindow();
+            // Cargar el archivo FXML
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
 
-            // Cerrar la ventana actual
-            currentStage.close();
-            this.recargar(currentStage, "PrincipalCliente-view.fxml");
+            // Carga el stage
+            Stage stage = (Stage) botonDejar.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+
+            PrincipalController controller = fxmlLoader.getController();
+            controller.setServer(this.getServer());
+            controller.setClient(this.getClient());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
-        } catch (RemoteException e) {
+    public void onVolver(ActionEvent actionEvent) {
+        try {
+            // Cargar el archivo FXML
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+
+            // Carga el stage
+            Stage stage = (Stage) botonDejar.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+
+            PrincipalController controller = fxmlLoader.getController();
+            controller.setServer(this.getServer());
+            controller.setClient(this.getClient());
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

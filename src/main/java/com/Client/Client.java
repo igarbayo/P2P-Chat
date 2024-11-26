@@ -98,7 +98,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     //Creo que esta ya no nos hace falta, se notifica a los clientes desde el servidor en añadirCliene llamo a notificar.
     // Método para notificar a otros clientes que un nuevo cliente se ha conectado
-    private void notificarAClientesConectados() throws RemoteException, MalformedURLException, NotBoundException {
+    /*private void notificarAClientesConectados() throws RemoteException, MalformedURLException, NotBoundException {
         // Aquí, en lugar de un registro manual, puedes usar un servidor para obtener todas las referencias remotas de clientes conectados
         // Este es un ejemplo simple donde se asume que ya tienes la lista de clientes conectados.
         List<String> listaClientesConectados = new ArrayList<>();
@@ -115,7 +115,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         }
 
 
-    }
+    }*/
 
     public boolean enviarMensaje(Client clientDestino, String contenido) {
         if (clientDestino == null || contenido == null || this.info == null) {

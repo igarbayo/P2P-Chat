@@ -51,6 +51,7 @@ public class SolicitudController extends AbstractVentana {
         if (username !=null && !username.isEmpty()) {
             try {
                 err = this.getServer().existeCliente(username);
+                System.out.println(err);
                 errorText.setVisible(!err);
 
                 // Si existe el cliente
@@ -70,10 +71,12 @@ public class SolicitudController extends AbstractVentana {
                             destinatario.setListaSolicitudes(listaSolicitudes); // Asegúrate de actualizar la referencia
                             this.getServer().actualizarClienteInfo(destinatario); // Actualiza en el servidor
                             //System.out.println(this.getClient().getInfo());
+
+                            stage.close();
                         }
                     }
                 }
-                stage.close();
+
 
             } catch (RemoteException e) {
                 throw new RuntimeException(e);

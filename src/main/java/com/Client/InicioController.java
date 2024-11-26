@@ -16,6 +16,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class InicioController extends AbstractVentana {
@@ -81,7 +83,7 @@ public class InicioController extends AbstractVentana {
 
                         // Registro RMI
                         client.registrarCliente(IP, puerto);
-                        this.getServer().anadirClienteEnLinea(info);
+                        //this.getServer().anadirClienteOnLine(client);
 
                         // Loader
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
@@ -98,6 +100,10 @@ public class InicioController extends AbstractVentana {
                         client.setIP(IP);
                         client.setPuerto(puerto);
                         this.setClient(client);
+
+                        String conectado = "Conectado: " + this.getClient().getInfo().getUsuario();
+                        this.getServer().notificarAmigos(client.getInfo(), conectado);
+
                         controller.setClient(client);
                         fxmlLoader.setController(controller);
                     } else {
@@ -159,14 +165,11 @@ public class InicioController extends AbstractVentana {
 
             // Registrar el cliente en RMI
             client.registrarCliente(IP, puerto);
+            //server.anadirClienteOnLine(client);
 
             // Actualizar estado online
             info.setOnline(true);
             server.actualizarClienteInfo(info);
-
-            // Añadir a la lista de clientes en línea
-            server.anadirClienteEnLinea(info);
-
 
             // Cargar la ventana principal
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
@@ -179,6 +182,9 @@ public class InicioController extends AbstractVentana {
 
             this.setClient(client);
             controller.setClient(client);
+
+            String conectado = "Conectado: " + this.getClient().getInfo().getUsuario();
+            this.getServer().notificarAmigos(client.getInfo(), conectado);
 
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);

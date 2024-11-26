@@ -53,16 +53,15 @@ public class PrincipalController extends AbstractVentana {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Amigo-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
 
-            // Crear un nuevo Stage para la nueva ventana
-            Stage newStage = new Stage();
-            newStage.setScene(scene);
-            newStage.show();
+            // Carga el stage
+            Stage stage = (Stage) usernameLabel.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
 
-            // Pasa la instancia del servidor, cliente y el amigo seleccionado al controlador de la nueva ventana
-            AmigoController amigoController = fxmlLoader.getController();
-            amigoController.setServer(this.getServer());
-            amigoController.setClient(this.getClient());
-            amigoController.setAmigo(amigoSeleccionado); // Aquí pasas el nombre o la información del amigo seleccionado
+            AmigoController controller = fxmlLoader.getController();
+            controller.setServer(this.getServer());
+            controller.setClient(this.getClient());
+            controller.setAmigo(amigoSeleccionado); // Aquí pasas el nombre o la información del amigo seleccionado
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

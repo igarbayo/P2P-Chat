@@ -13,6 +13,8 @@ import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
+    public void notificarAmigos(ClientInfo client, String mensaje) throws RemoteException;
+    public ClientInterface obtenerInstanciaConInfo(ClientInfo clientInfo) throws RemoteException;
     public void actualizarClienteInfo(ClientInfo clientInfo) throws RemoteException;
     public ClientInfo obtenerClienteInfo(String username) throws RemoteException;
 
@@ -24,7 +26,9 @@ public interface ServerInterface extends Remote {
 
     public void anadirCliente(ClientInfo clientInfo) throws RemoteException;
 
-    public List<ClientInfo> obtenerAmigosEnLinea(Client cliente) throws RemoteException;
+    public void anadirClienteOnLine(Client client) throws RemoteException;
+
+    public List<ClientInfo> obtenerAmigosEnLinea(ClientInfo cliente) throws RemoteException;
 
     public List<ClientInfo> obtenerAmigos(ClientInfo cliente) throws RemoteException;
 
@@ -32,8 +36,7 @@ public interface ServerInterface extends Remote {
 
     public void actualizarGrupoAmistad() throws RemoteException;
 
-    public void notificar(List<Client> clientes, String mensaje) throws RemoteException;
+    public void notificar(List<ClientInfo> clientes, String mensaje) throws RemoteException;
 
-    public void anadirClienteEnLinea(ClientInfo clientInfo) throws RemoteException;
 
 } // end interface

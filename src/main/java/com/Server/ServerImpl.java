@@ -13,9 +13,24 @@ import java.util.stream.Collectors;
  * This class implements the remote interface SomeInterface.*/
 public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
+    private String IP;
+    private int puerto;
     private List<Client> clientesEnLinea;
     private Map<String, ClientInfo> listaClientes;
     //private Map<Client, List<Client>> listaSolicitudes;
+
+    public String getIP() {
+        return IP;
+    }
+    public void setIP(String IP) {
+        this.IP = IP;
+    }
+    public int getPuerto() {
+        return puerto;
+    }
+    public void setPuerto(int puerto) {
+        this.puerto = puerto;
+    }
 
     // Constructor
     public ServerImpl() throws RemoteException {
@@ -42,6 +57,19 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
 
         return listaClientes.get(username); // Busca y devuelve el ClientInfo en el mapa
+    }
+
+
+    public ClientInterface obtenerInstanciaConInfo(ClientInfo clientInfo) throws RemoteException {
+        if (clientInfo != null && clientInfo.getUsuario() != null) {
+            for (Client client : clientesEnLinea) {
+                if (client.getInfo().equals(clientInfo)) {
+                    System.out.println("ALERTA" + clientInfo.getUsuario());
+                    return client;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean existeCliente(ClientInfo clientInfo) throws RemoteException {
@@ -102,7 +130,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             throw new IllegalArgumentException("El cliente con el usuario '" + usuario + "' ya está registrado.");
         }
         listaClientes.put(usuario, clientInfo);
+    }
 
+    public void anadirClienteOnLine(Client client) throws RemoteException {
+        if (client != null && client.getInfo() != null && client.getInfo().getUsuario() != null) {
+            clientesEnLinea.add(client);
+        }
     }
 
     /*public void anadirCliente(Client cliente) throws RemoteException {
@@ -118,18 +151,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         listaClientes.put(usuario, cliente.getInfo());
     }*/
 
-    public List<ClientInfo> obtenerAmigosEnLinea(Client cliente) throws RemoteException {
-        List<ClientInfo> lista = this.obtenerAmigos(cliente.getInfo());
-        for (ClientInfo info : lista) {
-            if (!info.isOnline()) {
-                lista.remove(info);
-            }
-        }
-        if (lista.isEmpty()) {
-            return List.of();
-        }
-        return lista;
+    public List<ClientInfo> obtenerAmigosEnLinea(ClientInfo cliente) throws RemoteException {
+        List<ClientInfo> lista = this.obtenerAmigos(cliente);
+        lista.removeIf(info -> !info.isOnline()); // Filtra los no conectados
+        return lista.isEmpty() ? List.of() : lista;
     }
+
 
     public List<ClientInfo> obtenerAmigos(ClientInfo cliente) throws RemoteException {
         if (cliente == null) {
@@ -199,54 +226,29 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
 
     //No funciona bien esta funcion. Habría que pillar la conexion. Si no se pueden enviar las notificaciones directamente desde los clientes.
-    public void notificar(List<Client> clientes, String mensaje) throws RemoteException {
+    public void notificar(List<ClientInfo> clientes, String mensaje) throws RemoteException {
         if (clientes == null || mensaje == null) {
             throw new IllegalArgumentException("La lista de clientes y el mensaje no pueden ser nulos");
         }
 
-        // Lista para almacenar los errores de notificación
-        List<String> errores = new ArrayList<>();
-
         // Intentar notificar a cada cliente en la lista
-        for (Client cliente : clientes) {
-            ClientInfo clienteInfo = cliente.getInfo();
+        for (ClientInfo clienteInfo : clientes) {
             if (clienteInfo != null && clienteInfo.isOnline()) {
-                // Buscar la interfaz remota del cliente
-                Optional<Client> clienteInterface = clientesEnLinea.stream()
-                        .filter(c -> {
-                            return c.getInfo().getUsuario().equals(clienteInfo.getUsuario());
-                        })
-                        .findFirst();
-
-                // Si encontramos la interfaz del cliente, enviamos la notificación
-                if (clienteInterface.isPresent()) {
-                    clienteInterface.get().recibirNotificacion(mensaje);
-                    //clienteInterface.get().recibirNotificacion(mensaje);
+                ClientInterface clientInterface = this.obtenerInstanciaConInfo(clienteInfo);
+                if (clientInterface != null) {
+                    clientInterface.recibirNotificacion(mensaje);
                 }
             }
         }
+    }
 
-        // Si hubo errores, lanzar una excepción con todos los errores acumulados
-        if (!errores.isEmpty()) {
-            throw new RemoteException("Errores durante la notificación:\n" + String.join("\n", errores));
+    public void notificarAmigos(ClientInfo client, String mensaje) throws RemoteException {
+        List<ClientInfo> amigosInfo = this.obtenerAmigosEnLinea(client);
+        if (amigosInfo != null && !amigosInfo.isEmpty()) {
+            this.notificar(amigosInfo, mensaje);
         }
     }
 
-
-    public void anadirClienteEnLinea(ClientInfo clientInfo) throws RemoteException {
-        if (clientInfo == null || clientInfo.getUsuario() == null) {
-            throw new IllegalArgumentException("La información del cliente o su usuario no pueden ser nulos.");
-        }
-        Client cliente = new Client();
-        cliente.setInfo(clientInfo);
-        // Verificar si el cliente ya existe en el mapa
-        if (clientesEnLinea.contains(cliente)) {
-            throw new IllegalArgumentException("El cliente ya está registrado online.");
-        }
-        // Agregar el ClientInterface
-        clientesEnLinea.add(cliente);
-
-    }
     /*
     public void anadirClienteEnLinea(ClientInterface cliente) throws RemoteException {
         if (cliente == null) {
