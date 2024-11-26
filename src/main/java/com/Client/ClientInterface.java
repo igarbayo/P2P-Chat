@@ -5,6 +5,17 @@ import java.rmi.RemoteException;
 
 public interface ClientInterface extends Remote {
 
+    //Metodo que devuelve el nombre de usuario de un clientInterface.
+    public String getNombre() throws RemoteException;
+    public ClientInfo getClientInfo() throws RemoteException;
+    
+    public Map<String, ClientInterface> getAmigosOnline() throws RemoteException;
+    public void setAmigosOnline(Map<String, ClientInterface> amigosOnline) throws RemoteException;
+
+    public void setListaAmigos(List<String> lista) throws RemoteException;
+
+    public List<String> obtenerNombresDeUsuario(List<ClientInterface> listaClientInterface) throws RemoteException;
+
     void setPrincipalController(PrincipalController principalController) throws RemoteException;
     // Método que se llama para enviar un mensaje a otro cliente
     void recibirMensaje(Mensaje mensaje) throws RemoteException;

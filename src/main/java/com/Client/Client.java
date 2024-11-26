@@ -50,6 +50,14 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
     private PrincipalController principalController;
 
+    public Map<String, ClientInterface> getAmigosOnLine() {
+        return amigosOnLine;
+    }
+
+    public void setAmigosOnLine(Map<String, ClientInterface> amigosOnLine) {
+        this.amigosOnLine = amigosOnLine;
+    }
+
     // Constructor
     public Client() throws RemoteException {
         super();
@@ -153,6 +161,35 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
+    public String getNombre() throws RemoteException{
+        return this.info.getUsuario();
+    }
+
+    public ClientInfo getClientInfo() throws RemoteException {
+        return this.info;
+    }
+
+    @Override
+    public Map<String, ClientInterface> getAmigosOnline() throws RemoteException {
+        return this.amigosOnLine;
+    }
+
+    @Override
+    public void setAmigosOnline(Map<String, ClientInterface> amigosOnline) throws RemoteException {
+        if(amigosOnline != null){
+            this.amigosOnLine=amigosOnline;
+        }
+    }
+
+
+    public void setListaAmigos(List<String> lista) throws RemoteException{
+        if (lista!=null && !lista.isEmpty()) {
+            this.info.setListaAmigos(lista);
+        }
+
+    }
+
+
     /**
      *
      * @param
@@ -233,7 +270,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
-    @Override
+
     public void setPrincipalController(PrincipalController principalController) throws RemoteException {
         this.principalController=principalController;
     }
@@ -299,14 +336,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
                 if (!this.info.getListaAmigos().contains(username)) {
                     this.info.getListaAmigos().add(username);
 
-                    // Crear un nuevo chat con el usuario
-                    ClientInterface clienteRemoto = (ClientInterface) Naming.lookup("rmi://" + IP + ":" + puerto + "/" + username);
-                    //falta algo clienteRemoto.RecibirSolicitudAceptada.
-                    /*if (clienteRemoto != null) {
-                        this.crearChat(((Client)clienteRemoto).getInfo());
-                    }*/
-                    clienteRemoto.recibirNotificacion("Amistad confirmada con"+username);
-
+                    Platform.runLater(() -> principalController.printEnConsola("Amistad confirmada con: " + username));
                     System.out.println("Amistad confirmada con: " + username);
                 }
             } catch (Exception e) {

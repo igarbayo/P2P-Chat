@@ -305,7 +305,7 @@ public class PrincipalController extends AbstractVentana {
 
         //Añado un objeto texto a la consola.
         //borra el texto antiguo
-        consola.getChildren().add(0,text);
+        consola.getChildren().add(text);
         if(consola.getChildren().size() > MAX_MESSAGES){
             consola.getChildren().remove(MAX_MESSAGES);
         }
