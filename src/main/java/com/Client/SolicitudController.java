@@ -50,7 +50,7 @@ public class SolicitudController extends AbstractVentana {
         // Variable de mensaje de error
         valido = true;
 
-        // FUncionamiento principal
+        // Funcionamiento principal
         if (username !=null && !username.isEmpty()) {
             try {
                 valido = this.getServer().existeCliente(username);
@@ -63,6 +63,8 @@ public class SolicitudController extends AbstractVentana {
                     if (destinatario != null && !this.getClient().getInfo().getListaAmigos().contains(destinatario.getNombre())) {
                         // Agregar esta solicitud a la lista de solicitudes del destinatario
                         this.getServer().anadirSolicitud(this.getClient().getNombre(), destinatario.getNombre());
+                        String solic = "Recibida solicitud de " + this.getClient().getNombre();
+                        this.getClient().notificarRecarga(destinatario, solic);
                         stage.close();
                     } else {
                         valido = false;

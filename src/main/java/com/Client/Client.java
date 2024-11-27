@@ -70,9 +70,41 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         super();
         this.info = null;
         this.chats = new ArrayList<Chat>();
+        this.amigosOnLine = new HashMap<>();
     }
 
     // Métodos
+    public PrincipalController getController() throws RemoteException {
+        return principalController;
+    }
+
+    public boolean getOnline() throws RemoteException {
+        if (this.info.isOnline()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void notificarRecarga(ClientInterface clienteObjetivo, String mensaje) {
+        try {
+            clienteObjetivo.recargarVentana(mensaje);
+            System.out.println("Se ha solicitado la recarga de la ventana del cliente.");
+        } catch (RemoteException e) {
+            System.err.println("Error al notificar la recarga: " + e.getMessage());
+        }
+    }
+    @Override
+    public void recargarVentana(String mensaje) throws RemoteException {
+        // Asegúrate de que la lógica gráfica se ejecute en el hilo de JavaFX
+        Platform.runLater(() -> {
+            if (principalController != null) {
+                principalController.recargarVista(mensaje); // Llama al método de tu controlador
+                System.out.println(this.getInfo().getListaAmigos());
+            } else {
+                System.out.println("No hay controlador disponible para recargar.");
+            }
+        });
+    }
     // Método para registrar al cliente en el registro RMI y enviar una notificación a otros clientes
     public void registrarCliente(String ip, int puerto) throws RemoteException {
         try {
@@ -101,7 +133,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             if (this.IP != null && this.info!=null && this.info.getUsuario()!=null) {
                 String URL = "rmi://" + this.IP + ":" + this.puerto + "/" + this.info.getUsuario();
                 System.out.println(URL);
-                Naming.unbind(URL);
+                //Naming.unbind(URL);
                 System.out.println("Cliente '" + info.getUsuario() + "' desregistrado en RMI.");
 
                 // Notificar a los demás clientes sobre la conexión
@@ -148,14 +180,14 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             // Buscar el objeto remoto del destinatario en el registro RMI
             ClientInterface destino = (ClientInterface) Naming.lookup("rmi://localhost/"
                     + clientDestino.getInfo().getUsuario());
-            Mensaje mensaje = new Mensaje(this.getInfo(), clientDestino.getInfo(), contenido);
-            Optional<Chat> chatDestino = clientDestino.obtenerChat(this.getInfo());
+            Mensaje mensaje = new Mensaje(this.getNombre(), clientDestino.getNombre(), contenido);
+            Optional<Chat> chatDestino = clientDestino.obtenerChat(this.getNombre());
             // Actualizamos en el destinatario
             if (chatDestino.isPresent()) {
                 destino.recibirMensaje(mensaje);  // Invocar el método remoto del destinatario
                 // Actualizamos en el origen
-                mensaje = new Mensaje(clientDestino.getInfo(), this.getInfo(), contenido);
-                chatDestino = this.obtenerChat(clientDestino.getInfo());
+                mensaje = new Mensaje(clientDestino.getNombre(), this.getNombre(), contenido);
+                chatDestino = this.obtenerChat(clientDestino.getNombre());
                 if (chatDestino.isPresent()) {
                     chatDestino.get().anadirMensaje(mensaje);
                     this.actualizarChat(chatDestino.get());
@@ -191,7 +223,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
 
     public void setListaAmigos(List<String> lista) throws RemoteException{
-        if (lista!=null && !lista.isEmpty()) {
+        if (lista!=null) {
             this.info.setListaAmigos(lista);
         }
 
@@ -249,11 +281,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
 
-    public Optional<Chat> obtenerChat(ClientInfo clientDestino) {
+    public Optional<Chat> obtenerChat(String clientDestino) {
         if (this.info != null && clientDestino != null &&
-                this.info.getListaAmigos().contains(clientDestino.getUsuario())) {
+                this.info.getListaAmigos().contains(clientDestino)) {
             return chats.stream()
-                    .filter(chat -> chat.getClientes().containsValue(info) && chat.getClientes().containsValue(clientDestino))
+                    .filter(chat -> chat.getClientes().contains(this.getInfo().getUsuario()) && chat.getClientes().contains(clientDestino))
                     .findFirst(); // Retorna el primer chat que cumpla la condición, o Optional.empty() si no se encuentra
         }
         return Optional.empty();
@@ -261,11 +293,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
 
     // Crea un chat entre el origen y un cliente destino
-    public void crearChat(ClientInfo clientDestino) {
+    public void crearChat(String clientDestino) {
         if (clientDestino!=null && obtenerChat(clientDestino).isEmpty()) {
-            Map<String, ClientInfo> clientes = new HashMap<>();
-            clientes.put(clientDestino.getUsuario(), clientDestino);
-            clientes.put(info.getUsuario(), info);
+            List<String> clientes = new ArrayList<>();
+            clientes.add(clientDestino);
+            clientes.add(info.getUsuario());
             Chat chat = new Chat(clientes);
             chats.add(chat);
         }
@@ -351,7 +383,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     @Override
     public void recibirNotificacion(String mensaje) throws RemoteException {
-        Platform.runLater(() -> principalController.printEnConsola(mensaje));
+        if (this.info.isOnline()) {
+            principalController.anadirMensajePendiente(mensaje);
+        }
+
     }
 
 

@@ -5,23 +5,23 @@ import java.util.Objects;
 public class Mensaje {
 
     // Atributos
-    private ClientInfo clienteOrigen;
-    private ClientInfo clienteDestino;
+    private String clienteOrigen;
+    private String clienteDestino;
     private String contenido;
 
     // Getters y setters
-    public ClientInfo getClienteOrigen() {
+    public String getClienteOrigen() {
         return clienteOrigen;
     }
-    public void setClienteOrigen(ClientInfo clienteOrigen) {
+    public void setClienteOrigen(String clienteOrigen) {
         if (clienteOrigen!=null) {
             this.clienteOrigen = clienteOrigen;
         }
     }
-    public ClientInfo getClienteDestino() {
+    public String getClienteDestino() {
         return clienteDestino;
     }
-    public void setClienteDestino(ClientInfo clienteDestino) {
+    public void setClienteDestino(String clienteDestino) {
         if (clienteDestino!=null) {
             this.clienteDestino = clienteDestino;
         }
@@ -36,7 +36,7 @@ public class Mensaje {
     }
 
     // Constructores
-    public Mensaje(ClientInfo clienteOrigen, ClientInfo clienteDestino, String contenido) {
+    public Mensaje(String clienteOrigen, String clienteDestino, String contenido) {
         if (clienteOrigen!=null) {
             this.clienteOrigen = clienteOrigen;
         }
@@ -63,6 +63,6 @@ public class Mensaje {
 
     @Override
     public String toString() {
-        return "[" + clienteOrigen.getUsuario() + "] " + contenido;
+        return "[" + clienteOrigen + "] " + contenido;
     }
 }

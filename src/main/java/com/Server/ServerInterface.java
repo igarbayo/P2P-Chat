@@ -28,7 +28,7 @@ public interface ServerInterface extends Remote {
 
     public void anadirClienteOnLine(ClientInterface client) throws RemoteException;
 
-    public List<ClientInterface> obtenerAmigosEnLinea(ClientInterface cliente) throws RemoteException;
+    public Map<String, ClientInterface> obtenerAmigosEnLinea(ClientInterface cliente) throws RemoteException;
 
     public List<String> obtenerAmigos(String usuario) throws RemoteException;
 

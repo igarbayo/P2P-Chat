@@ -8,14 +8,14 @@ import java.util.Objects;
 public class Chat {
 
     // Atributos
-    private Map<String, ClientInfo> clientes;
+    private List<String> clientes;
     private List<Mensaje> mensajes;
 
     // Getters y setters
-    public Map<String, ClientInfo> getClientes() {
+    public List<String> getClientes() {
         return clientes;
     }
-    public void setClientes(Map<String, ClientInfo> clientes) {
+    public void setClientes(List<String> clientes) {
         if (clientes != null) {
             this.clientes = clientes;
         }
@@ -30,7 +30,7 @@ public class Chat {
     }
 
     // Constructor
-    public Chat(Map<String, ClientInfo> clientes) {
+    public Chat(List<String> clientes) {
         if (clientes!=null) {
             this.clientes = clientes;
         }
@@ -40,8 +40,8 @@ public class Chat {
     // Añadir un mensaje
     public void anadirMensaje(Mensaje mensaje) {
         if (mensaje!=null &&
-                clientes.containsValue(mensaje.getClienteOrigen()) &&
-                clientes.containsValue(mensaje.getClienteDestino())
+                clientes.contains(mensaje.getClienteOrigen()) &&
+                clientes.contains(mensaje.getClienteDestino())
         ) {
             this.mensajes.add(mensaje);
         }

@@ -84,6 +84,10 @@ public class InicioController extends AbstractVentana {
                         // Registro RMI
                         client.registrarCliente(IP, puerto);
                         this.getServer().anadirClienteOnLine(client);
+                        if (client.getAmigosOnLine()!=null) {
+                            System.out.println("Amigos en línea: " + client.getAmigosOnLine().keySet());
+                        }
+                        System.out.println("Amigos (todos): " + client.getInfo().getListaAmigos());
 
                         // Loader
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));

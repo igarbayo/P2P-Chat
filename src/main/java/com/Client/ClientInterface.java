@@ -7,16 +7,23 @@ import java.util.Map;
 
 public interface ClientInterface extends Remote {
 
-    //Metodo que devuelve el nombre de usuario de un clientInterface.
-    public String getNombre() throws RemoteException;
-    public ClientInfo getClientInfo() throws RemoteException;
+    void recargarVentana(String mensaje) throws RemoteException;
+
+    String getNombre() throws RemoteException;
+
+    boolean getOnline() throws RemoteException;
+
+    ClientInfo getClientInfo() throws RemoteException;
+
+    PrincipalController getController() throws RemoteException;
     
-    public Map<String, ClientInterface> getAmigosOnline() throws RemoteException;
-    public void setAmigosOnline(Map<String, ClientInterface> amigosOnline) throws RemoteException;
+    Map<String, ClientInterface> getAmigosOnline() throws RemoteException;
 
-    public void setListaAmigos(List<String> lista) throws RemoteException;
+    void setAmigosOnline(Map<String, ClientInterface> amigosOnline) throws RemoteException;
 
-    public List<String> obtenerNombresDeUsuario(List<ClientInterface> listaClientInterface) throws RemoteException;
+    void setListaAmigos(List<String> lista) throws RemoteException;
+
+    List<String> obtenerNombresDeUsuario(List<ClientInterface> listaClientInterface) throws RemoteException;
 
     void setPrincipalController(PrincipalController principalController) throws RemoteException;
     // Método que se llama para enviar un mensaje a otro cliente
