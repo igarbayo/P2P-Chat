@@ -51,7 +51,7 @@ public class SolicitudController extends AbstractVentana {
         valido = true;
 
         // Funcionamiento principal
-        if (username !=null && !username.isEmpty()) {
+        if (username !=null && !username.isEmpty() && !(username.equals(this.getClient().getInfo().getUsuario()))) {
             try {
                 valido = this.getServer().existeCliente(username);
 

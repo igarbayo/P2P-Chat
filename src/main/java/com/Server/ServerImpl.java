@@ -228,6 +228,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             throw new IllegalArgumentException("El cliente con el usuario '" + usuario + "' ya está registrado.");
         }
         listaClientes.put(usuario, client.getClientInfo());
+
     }
 
     @Override
@@ -240,9 +241,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             Map<String, ClientInterface> mapa = this.obtenerAmigosEnLinea(client);
             if (mapa != null) {
                 client.setAmigosOnline(mapa);
+
             }
 
             System.out.println(clientesEnLinea.keySet());
+
+
         }
     }
 

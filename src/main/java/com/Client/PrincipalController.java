@@ -80,8 +80,9 @@ public class PrincipalController extends AbstractVentana {
                 if (mensaje2!=null) {
                     System.out.println("Mensaje: " + mensaje2);
                     printEnConsola(mensaje2);
+
                 }
-                //printEnConsola(mensaje);
+
             }
 
             try {
@@ -289,6 +290,19 @@ public class PrincipalController extends AbstractVentana {
                 }
 
                 listaAmigos.setItems(amigosObservableList);
+                //Si entra desde logIn mando notificación a sus amigos conectados de que hay un nuevo ususario.
+                /*if(this.getClient().getIsNew()==1){
+                    if(!amigosObservableList.isEmpty()){
+                        for(String usuarioAmigo : amigosObservableList){
+                            ClientInterface amigo = this.getServer().getInterface(usuarioAmigo);
+                            if(amigo.getOnline()){
+                                String notifConex="Tu amigo: "+this.getClient().getInfo().getUsuario()+"se ha conectado";
+                                this.getClient().notificarRecarga(amigo,notifConex);
+                            }
+                        }
+                        this.getClient().setIsNew(0);//lo pongo a 0 (ya no es nuevo)
+                    }
+                }*/
 
 
                 // Manejo de lista de solicitudes
@@ -320,6 +334,7 @@ public class PrincipalController extends AbstractVentana {
                                 this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
 
                                 //Debug
+                                System.out.println(clientInterface.getClientInfo().getListaAmigos());
                                 System.out.println(clientInterface.getClientInfo().getListaAmigos());
                                 System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
 
@@ -474,7 +489,7 @@ public class PrincipalController extends AbstractVentana {
 
         //Añado un objeto texto a la consola.
         //borra el texto antiguo
-        consola.getChildren().add(text);
+        consola.getChildren().add(0,text);
         if(consola.getChildren().size() > MAX_MESSAGES){
             consola.getChildren().remove(MAX_MESSAGES);
         }

@@ -7,6 +7,8 @@ import java.util.Map;
 
 public interface ClientInterface extends Remote {
 
+    void addNotificacion(String notificacion) throws RemoteException;
+
     void recargarVentana(String mensaje) throws RemoteException;
 
     String getNombre() throws RemoteException;

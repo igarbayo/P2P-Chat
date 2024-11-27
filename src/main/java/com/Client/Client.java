@@ -24,6 +24,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     private String IP;
     private int puerto;
     private Map<String, ClientInterface> amigosOnLine;
+    private List<String> listaNotificaciones;
 
 
     public String getIP() {
@@ -64,6 +65,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public void setAmigosOnLine(Map<String, ClientInterface> amigosOnLine) {
         this.amigosOnLine = amigosOnLine;
     }
+    public void addNotificacion(String notificacion) {
+        listaNotificaciones.add(notificacion);
+    }
 
     // Constructor
     public Client() throws RemoteException {
@@ -71,6 +75,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         this.info = null;
         this.chats = new ArrayList<Chat>();
         this.amigosOnLine = new HashMap<>();
+        this.listaNotificaciones = new ArrayList<>();
     }
 
     // Métodos
@@ -336,8 +341,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
                 if (!this.info.getListaAmigos().contains(username)) {
                     this.info.getListaAmigos().add(username);
 
-                    Platform.runLater(() -> principalController.printEnConsola("Amistad confirmada con: " + username));
-                    System.out.println("Amistad confirmada con: " + username);
+                    //Platform.runLater(() -> principalController.printEnConsola("Amistad confirmada con: " + username));
+                    //System.out.println("Amistad confirmada con: " + username);
                 }
             } catch (Exception e) {
                 System.err.println("Error al confirmar amistad con " + username);
@@ -350,7 +355,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     @Override
     public void recibirNotificacion(String mensaje) throws RemoteException {
         if (this.info.isOnline()) {
-            principalController.recargarVista(mensaje);
+            addNotificacion(mensaje);
         }
 
     }

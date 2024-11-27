@@ -106,6 +106,7 @@ public class InicioController extends AbstractVentana {
                     if (password.equals(decryptedPassword)) {
                         client.setInfo(info);
                         client.getInfo().setOnline(true);
+
                         this.getServer().actualizarClienteInfo(client);
 
                         // Registro RMI
@@ -133,7 +134,7 @@ public class InicioController extends AbstractVentana {
                         client.setPrincipalController(controller);
                         this.setClient(client);
 
-                        String con = "Amigo " + this.getClient().getInfo().getUsuario() + " conectado";
+                        String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + "se ha conectado";
                         System.out.println(con);
                         this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), con);
 
@@ -218,6 +219,7 @@ public class InicioController extends AbstractVentana {
 
             // Actualizar estado online
             info.setOnline(true);
+
             server.actualizarClienteInfo(client);
 
             // Cargar la ventana principal
