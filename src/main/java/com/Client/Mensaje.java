@@ -1,8 +1,9 @@
 package com.Client;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Mensaje {
+public class Mensaje implements Serializable {
 
     // Atributos
     private String clienteOrigen;

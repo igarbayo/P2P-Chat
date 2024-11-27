@@ -192,6 +192,8 @@ public class AmigoController extends AbstractVentana{
                             System.out.println(m);
                             addMessage(m.toString());
                         }
+
+                        this.getClient().enviarMensaje(this.getServer().getInterface(amigo), mensaje);
                     } else {
                         System.out.println("No hay chat");
                     }

@@ -65,7 +65,7 @@ public class PrincipalController extends AbstractVentana {
         // Lógica para actualizar la ventana
         Platform.runLater(() -> {
 
-            System.out.println("Se procede a recargar la vista.");
+            System.out.println("3. Se procede a recargar la vista.");
 
             if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
                 this.mensajePendiente = new ArrayList<>();
@@ -78,8 +78,10 @@ public class PrincipalController extends AbstractVentana {
             this.mensajePendiente.add(mensaje);
             for (String mensaje2: this.mensajePendiente) {
                 if (mensaje2!=null) {
+                    System.out.println("Mensaje: " + mensaje2);
                     printEnConsola(mensaje2);
                 }
+                //printEnConsola(mensaje);
             }
 
             try {

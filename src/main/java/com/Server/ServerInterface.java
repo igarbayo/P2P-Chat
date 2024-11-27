@@ -13,27 +13,22 @@ import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
-    public void anadirSolicitud(String origen, String destino) throws RemoteException;
-    public void eliminarSolicitud(String origen, String destino) throws RemoteException;
-    public ClientInterface getInterface(String username) throws RemoteException;
-    public void notificarAmigos(ClientInterface client, String mensaje) throws RemoteException;
-    public void actualizarClienteInfo(ClientInterface clientInfo) throws RemoteException;
-    public ClientInfo obtenerClienteInfo(String username) throws RemoteException;
-    public List<String> getSolicitudes(ClientInterface client) throws RemoteException;
-    public boolean existeCliente(ClientInterface client) throws RemoteException;
-
-    public boolean existeCliente(String username) throws RemoteException;
-
-    public void anadirCliente(ClientInterface client) throws RemoteException;
-
-    public void anadirClienteOnLine(ClientInterface client) throws RemoteException;
-
-    public Map<String, ClientInterface> obtenerAmigosEnLinea(ClientInterface cliente) throws RemoteException;
-
-    public List<String> obtenerAmigos(String usuario) throws RemoteException;
-
-    public void actualizarGrupoAmistad() throws RemoteException;
-
-    public void notificar(List<ClientInterface> clientes, String mensaje) throws RemoteException;
+    void cargarInformacionClientes() throws RemoteException;
+    void guardarInformacionClientes() throws RemoteException;
+    void anadirSolicitud(String origen, String destino) throws RemoteException;
+    void eliminarSolicitud(String origen, String destino) throws RemoteException;
+    ClientInterface getInterface(String username) throws RemoteException;
+    void notificarAmigos(ClientInterface client, String mensaje) throws RemoteException;
+    void actualizarClienteInfo(ClientInterface clientInfo) throws RemoteException;
+    ClientInfo obtenerClienteInfo(String username) throws RemoteException;
+    List<String> getSolicitudes(ClientInterface client) throws RemoteException;
+    boolean existeCliente(ClientInterface client) throws RemoteException;
+    boolean existeCliente(String username) throws RemoteException;
+    void anadirCliente(ClientInterface client) throws RemoteException;
+    void anadirClienteOnLine(ClientInterface client) throws RemoteException;
+    Map<String, ClientInterface> obtenerAmigosEnLinea(ClientInterface cliente) throws RemoteException;
+    List<String> obtenerAmigos(String usuario) throws RemoteException;
+    void actualizarGrupoAmistad() throws RemoteException;
+    void notificar(List<ClientInterface> clientes, String mensaje) throws RemoteException;
 
 } // end interface

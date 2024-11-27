@@ -4,6 +4,7 @@ import com.Client.Client;
 import com.Client.ClientInfo;
 import com.Client.ClientInterface;
 
+import java.io.*;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.*;
@@ -13,14 +14,14 @@ import java.util.stream.Collectors;
  * This class implements the remote interface SomeInterface.*/
 public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
+    // Atributos
     private String IP;
     private int puerto;
     private Map<String, ClientInterface> clientesEnLinea;
     private Map<String, ClientInfo> listaClientes;
     List<Map.Entry<String, String>> listaSolicitudes;
 
-
-
+    // Getters y setters
     public String getIP() {
         return IP;
     }
@@ -42,6 +43,102 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         this.listaSolicitudes=new ArrayList<>();
     }
 
+    @Override
+    public void cargarInformacionClientes() throws RemoteException {
+        String filePath = "src/main/resources/com/Server/clientInfo.txt";
+        File file = new File(filePath);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            StringBuilder currentClientInfo = new StringBuilder();
+            String line;
+            boolean readingClient = false;
+
+            while ((line = reader.readLine()) != null) {
+                // Detectar el inicio de un bloque ClientInfo
+                if (line.trim().startsWith("ClientInfo{")) {
+                    readingClient = true;
+                    currentClientInfo.setLength(0); // Resetear el StringBuilder
+                }
+
+                if (readingClient) {
+                    currentClientInfo.append(line).append("\n");
+                    // Detectar el final del bloque ClientInfo
+                    if (line.contains("}")) {
+                        readingClient = false;
+                        // Analizar y guardar el ClientInfo completo
+                        ClientInfo clientInfo = parseClientInfo(currentClientInfo.toString());
+                        if (clientInfo != null) {
+                            listaClientes.put(clientInfo.getUsuario(), clientInfo);
+                        }
+                    }
+                }
+            }
+
+            System.out.println("Información de clientes cargada correctamente desde " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error al cargar la información de los clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private ClientInfo parseClientInfo(String data) {
+        try {
+            String usuario = extractValue(data, "usuario='", "',");
+            String contrasena = extractValue(data, "contrasena='", "',");
+            String listaAmigosString = extractValue(data, "listaAmigos=", "]");
+            boolean online = Boolean.parseBoolean(extractValue(data, "online=", "}").trim());
+
+            // Convertir la cadena de listaAmigos a una lista de Strings
+            List<String> listaAmigos = new ArrayList<>();
+            if (!listaAmigosString.isEmpty() && !listaAmigosString.equals("null")) {
+                listaAmigosString = listaAmigosString.replaceAll("[\\[\\] ]", ""); // Eliminar corchetes y espacios
+                if (!listaAmigosString.isEmpty()) {
+                    listaAmigos = Arrays.asList(listaAmigosString.split(","));
+                }
+            }
+
+            // Crear y devolver un nuevo objeto ClientInfo
+            return new ClientInfo(usuario, contrasena, listaAmigos, online);
+        } catch (StringIndexOutOfBoundsException e) {
+            System.err.println("Error al analizar ClientInfo: " + data);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String extractValue(String data, String start, String end) {
+        int startIndex = data.indexOf(start);
+        int endIndex = data.indexOf(end, startIndex);
+        if (startIndex != -1 && endIndex != -1 && startIndex + start.length() <= endIndex) {
+            return data.substring(startIndex + start.length(), endIndex).trim();
+        }
+        // Imprimir información de depuración si no se encuentran los delimitadores
+        System.err.println("Delimitadores no encontrados en la cadena: " + data + start);
+        return "";
+    }
+
+    // Guardar la información
+    @Override
+    public void guardarInformacionClientes() throws RemoteException {
+        String filePath = "src/main/resources/com/Server/clientInfo.txt"; // Ruta del archivo en resources
+        File file = new File(filePath);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (Map.Entry<String, ClientInfo> entry : listaClientes.entrySet()) {
+                // Escribir cada ClientInfo en el archivo
+                writer.write(entry.getValue().toString());
+                writer.newLine();
+            }
+            System.out.println("Información de clientes guardada correctamente en " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error al guardar la información de los clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    // Métodos
+    @Override
     public void anadirSolicitud(String origen, String destino) throws RemoteException {
         if (origen!=null && destino!=null) {
             if (!this.listaSolicitudes.contains(new AbstractMap.SimpleEntry<>(origen, destino))) {
@@ -50,12 +147,14 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
     public void eliminarSolicitud(String origen, String destino) throws RemoteException {
         if (origen!=null && destino!=null) {
             this.listaSolicitudes.remove(new AbstractMap.SimpleEntry<>(origen, destino));
         }
     }
 
+    @Override
     public List<String> getSolicitudes(ClientInterface client) throws RemoteException {
         if (client != null) {
             List<String> lista = new ArrayList<>();
@@ -70,11 +169,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
     public ClientInterface getInterface(String username) throws RemoteException {
             // Añadir comprobacion con otro parametro de que sean amigas
             return this.clientesEnLinea.get(username);
     }
 
+    @Override
     public void actualizarClienteInfo(ClientInterface client) throws RemoteException {
         ClientInfo clientInfo=client.getClientInfo();
         if (clientInfo != null && clientInfo.getUsuario() != null) {
@@ -87,6 +188,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }
 
     // REVISAR
+    @Override
     public ClientInfo obtenerClienteInfo(String username) throws RemoteException {
         if (username == null || username.isEmpty()) {
             return null; // Devuelve null si el nombre de usuario es nulo o vacío
@@ -95,7 +197,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return listaClientes.get(username); // Busca y devuelve el ClientInfo en el mapa
     }
 
-
+    @Override
     public boolean existeCliente(ClientInterface client) throws RemoteException {
         ClientInfo clientInfo = client.getClientInfo();
         if (clientInfo == null || clientInfo.getUsuario() == null) {
@@ -106,6 +208,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return listaClientes.containsKey(clientInfo.getUsuario());
     }
 
+    @Override
     public boolean existeCliente(String username) throws RemoteException {
         if (username == null || username.isEmpty()) {
             return false; // Si el nombre de usuario es nulo o está vacío, no existe
@@ -115,6 +218,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return listaClientes.containsKey(username);
     }
 
+    @Override
     public void anadirCliente(ClientInterface client) throws RemoteException {
         if (client == null || client.getNombre() == null || client.getClientInfo()==null) {
             throw new IllegalArgumentException("La información del cliente o su usuario no pueden ser nulos.");
@@ -126,6 +230,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         listaClientes.put(usuario, client.getClientInfo());
     }
 
+    @Override
     public void anadirClienteOnLine(ClientInterface client) throws RemoteException {
         if (client != null) {
             // Añadimos el cliente a lista del servidor
@@ -141,6 +246,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
     public Map<String, ClientInterface> obtenerAmigosEnLinea(ClientInterface clienteInterface) throws RemoteException {
         // Verifica si el cliente proporcionado es válido
         if (clienteInterface == null) {
@@ -174,6 +280,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return amigosEnLinea;
     }
 
+    @Override
     public List<String> obtenerAmigos(String usuario) throws RemoteException {
         if (usuario == null) {
             return List.of(); // Si el cliente o su información es nula, devuelve una lista vacía
@@ -195,7 +302,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return amigos;
     }
 
-
+    @Override
     public void actualizarGrupoAmistad() throws RemoteException {
         // Lista para almacenar clientes que necesitan ser notificados
         List<Client> clientesANotificar = new ArrayList<>();
@@ -233,7 +340,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
-
+    @Override
     //No funciona bien esta funcion. Habría que pillar la conexion. Si no se pueden enviar las notificaciones directamente desde los clientes.
     public void notificar(List<ClientInterface> clientes, String mensaje) throws RemoteException {
         if (clientes == null || mensaje == null) {
@@ -248,6 +355,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
     public void notificarAmigos(ClientInterface client, String mensaje) throws RemoteException {
         Map<String, ClientInterface> amigos = this.obtenerAmigosEnLinea(client);
         if (amigos!=null && !amigos.isEmpty()) {

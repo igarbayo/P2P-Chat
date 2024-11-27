@@ -21,6 +21,20 @@ public class Server {
             String registryURL = "rmi://" + "localhost" + ":" + PUERTO + "/server";
             // Hacemos el bind en el registro indicado
             Naming.rebind(registryURL, exportedObj);
+            exportedObj.cargarInformacionClientes();
+
+            // Apagado del servidor por defecto
+            // Agregar un hook de cierre para guardar la información al detener la aplicación
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    System.out.println("Guardando la información de los clientes antes de cerrar...");
+                    exportedObj.guardarInformacionClientes();
+                } catch (RemoteException e) {
+                    System.err.println("Error al guardar la información de los clientes en el cierre: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }));
+
             System.out.println("Servidor listo.");
         }
         catch (RemoteException | MalformedURLException e) {

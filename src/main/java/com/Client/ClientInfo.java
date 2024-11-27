@@ -32,19 +32,25 @@ public class ClientInfo implements Serializable {
     public void setListaAmigos(List<String> listaAmigos) {
         this.listaAmigos = listaAmigos;
     }
-   public boolean isOnline() {
+    public boolean isOnline() {
         return online;
     }
     public void setOnline(boolean online) {
         this.online = online;
     }
 
-    // Constructor
+    // Constructores
     public ClientInfo(String usuario, String contrasena) {
         this.usuario = usuario;
         this.contrasena = contrasena;
         this.listaAmigos = new ArrayList<>();
         this.online = false;
+    }
+    public ClientInfo(String usuario, String contrasena, List<String> listaAmigos, boolean online) {
+        this.usuario = usuario;
+        this.contrasena = contrasena;
+        this.listaAmigos = listaAmigos;
+        this.online = online;
     }
 
     @Override

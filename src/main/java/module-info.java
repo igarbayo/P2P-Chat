@@ -3,6 +3,7 @@ module com.Server {
     requires javafx.fxml;
     requires java.rmi;
     requires java.desktop;
+    requires org.bouncycastle.provider;
 
     // Permite la reflexión para el paquete com.Server
     opens com.Server to javafx.fxml, java.rmi;
