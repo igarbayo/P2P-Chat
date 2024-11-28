@@ -107,7 +107,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     @Override
     public void recargarVentana() throws RemoteException {
         // Asegúrate de que la lógica gráfica se ejecute en el hilo de JavaFX
-        Platform.runLater(() -> {
+        //Platform.runLater(() -> {
             if (principalController != null) {
                 System.out.println("2. Se llama a recargar vista");
                 this.principalController.recargarVista(); // Llama al método de tu controlador
@@ -115,7 +115,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             } else {
                 System.out.println("2. No hay controlador disponible para recargar.");
             }
-        });
+        //});
     }
 
     public void registrarCliente(String ip, int puerto) throws RemoteException {
