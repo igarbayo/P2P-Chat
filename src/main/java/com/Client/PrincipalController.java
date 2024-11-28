@@ -24,7 +24,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PrincipalController extends AbstractVentana {
 
@@ -44,6 +48,10 @@ public class PrincipalController extends AbstractVentana {
     @FXML
     private transient ScrollPane scrollPane;
 
+
+    private static final ReentrantLock lockSolicitudes = new ReentrantLock(); // Candado
+    private static final ReentrantLock lockAmigos = new ReentrantLock();
+
     private static final int MAX_MESSAGES = 100;
     private List<String> mensajePendiente;
     ObservableList<String> amigosObservableList;
@@ -62,147 +70,7 @@ public class PrincipalController extends AbstractVentana {
     }*/
 
     public void recargarVista() {
-        // Lógica para actualizar la ventana
-        Platform.runLater(() -> {
 
-            System.out.println("3. Se procede a recargar la vista.");
-
-            /*if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
-                this.mensajePendiente = new ArrayList<>();
-            }*/
-
-            // Mostramos el nombre del usuario conectado
-            usernameLabel.setText(this.getClient().getInfo().getUsuario());
-            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-            this.printEnConsola();
-            /*this.mensajePendiente.add(mensaje);
-            for (String mensaje2: this.mensajePendiente) {
-                if (mensaje2!=null) {
-                    System.out.println("Mensaje: " + mensaje2);
-                    printEnConsola(mensaje2);
-
-                }
-
-            }*/
-
-            try {
-
-                amigosObservableList = FXCollections.observableArrayList();
-
-                if (this.getServer() != null && this.getClient() != null) {
-                    List<String> amigosUsuarios = this.getServer().obtenerAmigos(this.getClient().getInfo().getUsuario());
-                    for (String username : amigosUsuarios) {
-                        try {
-                            ClientInterface amigo = this.getServer().getInterface(username);
-                            String estado = amigo.getClientInfo().getUsuario() + (amigo.getClientInfo().isOnline() ? " [Online]" : " [Offline]");
-                            amigosObservableList.add(estado);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
-                        }
-                    }
-                    listaAmigos.setItems(amigosObservableList);
-                }
-
-
-
-
-                // Manejo de lista de solicitudes
-                if (this.getClient() != null) {
-                    List<String> solicitudes;
-                    solicitudes = this.getServer().getSolicitudes(this.getClient());
-                    for (String username : solicitudes) {
-                        HBox hbox = new HBox();
-                        Label label = new Label(username);
-                        Button acceptButton = new Button("V");
-                        Button rejectButton = new Button("X");
-
-                        // Asignar acción de aceptar
-                        acceptButton.setOnAction(event -> {
-                            ClientInterface clientInterface = null;
-                            try {
-                                clientInterface = this.getServer().getInterface(username);
-                                this.getClient().aceptarSolicitudAmistad(clientInterface.getClientInfo());
-
-                                // Añadir cliente a mano
-                                List<String> amigosDest = clientInterface.getClientInfo().getListaAmigos();
-                                amigosDest.add(this.getClient().getNombre());
-                                clientInterface.setListaAmigos(amigosDest);
-                                System.out.println(clientInterface.getClientInfo().getListaAmigos());
-
-
-                                clientInterface.confirmarAmistad(this.getClient().getNombre());
-                                this.getServer().actualizarClienteInfo(this.getClient());
-                                this.getServer().actualizarClienteInfo(clientInterface);
-                                this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                //Debug
-                                System.out.println(clientInterface.getClientInfo().getListaAmigos());
-                                System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
-
-                                // Ventana gráfica
-                                this.getClient().addNotificacion("Aceptado");
-                                String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
-                                clientInterface.addNotificacion(acepto);
-                                this.getClient().notificarRecarga(clientInterface);
-                                this.recargar(stage, "PrincipalCliente-view.fxml");
-
-
-                            } catch (RemoteException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                        });
-
-                        // Asignar acción de rechazar
-                        rejectButton.setOnAction(event -> {
-                            ClientInterface clientInterface = null;
-                            try {
-                                clientInterface = this.getServer().getInterface(username);
-                                this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                // recargar la ventana gráfica
-
-                                this.getClient().addNotificacion("rechazado");
-                                String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
-                                clientInterface.addNotificacion(rechazo);
-                                this.getClient().notificarRecarga(clientInterface);
-                                this.recargar(stage, "PrincipalCliente-view.fxml");
-
-                            } catch (RemoteException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                        });
-
-                        // Añadir solicitudes a la lista
-                        hbox.getChildren().addAll(label, acceptButton, rejectButton);
-                        listaSolicitudes.getItems().add(hbox);
-                    }
-                } else {
-                    listaSolicitudes.setItems(FXCollections.observableList(new ArrayList<>()));
-                }
-
-
-                // Agregar el evento de selección para la ListView de amigos
-                listaAmigos.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        // Extrae el nombre del amigo seleccionado
-                        String amigoSeleccionado = newValue.split(" ")[0];
-
-                        // Llamar al método para abrir la ventana correspondiente
-                        openAmigoView(amigoSeleccionado);
-
-                        // Restablece la selección a nula después de abrir la ventana
-                        Platform.runLater(() -> listaAmigos.getSelectionModel().clearSelection());
-                    }
-                });
-
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        });
     }
 
     /*public void setMensajePendiente(List<String> mensajePendiente) {
@@ -233,7 +101,7 @@ public class PrincipalController extends AbstractVentana {
                 AmigoController controller = fxmlLoader.getController();
                 controller.setServer(this.getServer());
                 controller.setClient(this.getClient());
-                controller.setAmigo(amigoSeleccionado); // Aquí pasas el nombre o la información del amigo seleccionado
+                controller.setAmigo(this.getClient().getInterface(amigoSeleccionado)); // Aquí pasas el nombre o la información del amigo seleccionado
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -245,163 +113,182 @@ public class PrincipalController extends AbstractVentana {
     // Disposición inicial
     @Override
     public void initialize(URL url, ResourceBundle resources) {
-        // Lógica para actualizar la ventana
-        Platform.runLater(() -> {
 
-            // Configurar un shutdown hook para manejar la desconexión cuando se cierra el programa con SIGINT
-            Runtime.getRuntime().addShutdownHook(new Thread(this::safeHandleWindowClose));
+        // Mensaje de bienvenida
+        Text bienvenido = new Text("Bienvenido");
+        consola.getChildren().add(0, bienvenido);
 
-            // Obtenemos el stage actual
-            stage = (Stage) usernameLabel.getScene().getWindow();
+        // Crear el scheduler
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-            // Configuramos el cierre seguro cuando se pulsa la X
-            stage.setOnCloseRequest(event -> {
-                //event.consume();
-                safeHandleWindowClose();
-            });
+        // Definir la tarea a ejecutar
+        Runnable task = () -> {
+            //System.out.println("Tarea ejecutada a las: " + System.currentTimeMillis());
+            // Lógica para actualizar la ventana
+            Platform.runLater(() -> {
+                if (usernameLabel.getScene() != null) {
+                    stage = (Stage) usernameLabel.getScene().getWindow();
+                    if (stage != null) {
+                        Runtime.getRuntime().addShutdownHook(new Thread(this::safeHandleWindowClose));
+                        stage.setOnCloseRequest(event -> {
+                            safeHandleWindowClose();
+                        });
+                    }
+                    }
 
-            /*if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
-                this.mensajePendiente = new ArrayList<>();
-            }*/
+                    // Mostramos el nombre del usuario conectado
+                    usernameLabel.setText(this.getClient().getInfo().getUsuario());
+                    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
-            // Mostramos el nombre del usuario conectado
-            usernameLabel.setText(this.getClient().getInfo().getUsuario());
-            scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                    //this.mensajePendiente.add(mensaje);
+                    printEnConsola();
 
-            //this.mensajePendiente.add(mensaje);
-            printEnConsola();
+                    try {
 
-            try {
-
-                amigosObservableList = FXCollections.observableArrayList();
-
-                if (this.getServer() != null && this.getClient() != null) {
-                    List<String> amigosUsuarios = this.getServer().obtenerAmigos(this.getClient().getInfo().getUsuario());
-
-                    for (String username : amigosUsuarios) {
+                        // Manejo de amigos
+                        lockAmigos.lock();
                         try {
-                            ClientInterface amigo = this.getServer().getInterface(username);
-                            String estado = amigo.getClientInfo().getUsuario() + (amigo.getClientInfo().isOnline() ? " [Online]" : " [Offline]");
-                            amigosObservableList.add(estado);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
+                            amigosObservableList = FXCollections.observableArrayList();
+
+                            if (this.getServer() != null && this.getClient() != null) {
+                                List<String> amigosUsuarios = this.getServer().obtenerAmigos(this.getClient().getInfo().getUsuario());
+
+                                for (String username : amigosUsuarios) {
+                                    try {
+                                        ClientInterface amigo = this.getClient().getInterface(username);
+                                        String estado = amigo.getClientInfo().getUsuario() + (amigo.getClientInfo().isOnline() ? " [Online]" : " [Offline]");
+                                        amigosObservableList.add(estado);
+                                    } catch (RemoteException e) {
+                                        e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
+                                    }
+                                }
+                                listaAmigos.setItems(amigosObservableList);
+                            }
+                        } finally {
+                            lockAmigos.unlock();
                         }
-                    }
-                    listaAmigos.setItems(amigosObservableList);
-                }
 
 
-                //Si entra desde logIn mando notificación a sus amigos conectados de que hay un nuevo ususario.
-                /*if(this.getClient().getIsNew()==1){
-                    if(!amigosObservableList.isEmpty()){
-                        for(String usuarioAmigo : amigosObservableList){
-                            ClientInterface amigo = this.getServer().getInterface(usuarioAmigo);
-                            if(amigo.getOnline()){
-                                String notifConex="Tu amigo: "+this.getClient().getInfo().getUsuario()+"se ha conectado";
-                                this.getClient().notificarRecarga(amigo,notifConex);
+                        lockSolicitudes.lock();
+                        try {
+                            // Manejo de lista de solicitudes
+                            // Vaciar el ListView
+                            listaSolicitudes.getItems().clear();
+                            if (this.getClient() != null) {
+                                List<String> solicitudes;
+                                solicitudes = this.getServer().getSolicitudes(this.getClient());
+                                for (String username : solicitudes) {
+                                    HBox hbox = new HBox();
+                                    Label label = new Label(username);
+                                    Button acceptButton = new Button("V");
+                                    Button rejectButton = new Button("X");
+
+                                    // Asignar acción de aceptar
+                                    acceptButton.setOnAction(event -> {
+                                        ClientInterface clientInterface = null;
+                                        try {
+                                            clientInterface = this.getServer().getInterface(username);
+                                            this.getClient().aceptarSolicitudAmistad(clientInterface.getClientInfo());
+
+                                            // Añadir cliente a mano
+                                            List<String> amigosDest = clientInterface.getClientInfo().getListaAmigos();
+                                            amigosDest.add(this.getClient().getNombre());
+                                            clientInterface.setListaAmigos(amigosDest);
+                                            System.out.println(clientInterface.getClientInfo().getListaAmigos());
+
+                                            // Actualizar amigos online
+                                            this.getClient().addAmigoOnline(username, clientInterface);
+                                            clientInterface.addAmigoOnline(this.getClient().getInfo().getUsuario(), this.getClient());
+
+                                            this.getServer().actualizarClienteInfo(this.getClient());
+                                            this.getServer().actualizarClienteInfo(clientInterface);
+                                            clientInterface.confirmarAmistad(this.getClient().getNombre());
+                                            this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
+
+                                            //Debug
+                                            System.out.println(clientInterface.getClientInfo().getListaAmigos());
+                                            System.out.println(clientInterface.getClientInfo().getListaAmigos());
+                                            System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
+
+                                            // Ventana gráfica
+                                            this.getClient().addNotificacion("Aceptado");
+                                            String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
+                                            clientInterface.addNotificacion(acepto);
+                                            //this.getClient().notificarRecarga(clientInterface);
+                                            this.recargar(stage, "PrincipalCliente-view.fxml");
+
+
+                                        } catch (RemoteException e) {
+                                            throw new RuntimeException(e);
+                                        }
+
+                                    });
+
+                                    // Asignar acción de rechazar
+                                    rejectButton.setOnAction(event -> {
+                                        ClientInterface clientInterface = null;
+                                        try {
+                                            clientInterface = this.getServer().getInterface(username);
+                                            this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
+
+                                            // recargar la ventana gráfica
+                                            this.getClient().addNotificacion("Rechazado");
+                                            String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
+                                            clientInterface.addNotificacion(rechazo);
+                                            //this.getClient().notificarRecarga(clientInterface);
+                                            this.recargar(stage, "PrincipalCliente-view.fxml");
+
+                                        } catch (RemoteException e) {
+                                            throw new RuntimeException(e);
+                                        }
+
+                                    });
+
+                                    // Añadir solicitudes a la lista
+                                    hbox.getChildren().addAll(label, acceptButton, rejectButton);
+                                    if (!listaSolicitudes.getItems().contains(hbox)) {
+                                        listaSolicitudes.getItems().add(hbox);
+                                    }
+                                }
+                            } else {
+                                listaSolicitudes.setItems(FXCollections.observableList(new ArrayList<>()));
                             }
+                        } finally {
+                            lockSolicitudes.unlock();
                         }
-                        this.getClient().setIsNew(0);//lo pongo a 0 (ya no es nuevo)
+
+
+                        lockAmigos.lock();
+                        try {
+                            // Agregar el evento de selección para la ListView de amigos
+                            listaAmigos.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                                if (newValue != null) {
+                                    // Extrae el nombre del amigo seleccionado
+                                    String amigoSeleccionado = newValue.split(" ")[0];
+
+                                    // Llamar al método para abrir la ventana correspondiente
+                                    openAmigoView(amigoSeleccionado);
+
+                                    // Restablece la selección a nula después de abrir la ventana
+                                    Platform.runLater(() -> listaAmigos.getSelectionModel().clearSelection());
+                                }
+                            });
+                        } finally {
+                            lockAmigos.unlock();
+                        }
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                }*/
 
-
-                // Manejo de lista de solicitudes
-                if (this.getClient() != null) {
-                    List<String> solicitudes;
-                    solicitudes = this.getServer().getSolicitudes(this.getClient());
-                    for (String username : solicitudes) {
-                        HBox hbox = new HBox();
-                        Label label = new Label(username);
-                        Button acceptButton = new Button("V");
-                        Button rejectButton = new Button("X");
-
-                        // Asignar acción de aceptar
-                        acceptButton.setOnAction(event -> {
-                            ClientInterface clientInterface = null;
-                            try {
-                                clientInterface = this.getServer().getInterface(username);
-                                this.getClient().aceptarSolicitudAmistad(clientInterface.getClientInfo());
-
-                                // Añadir cliente a mano
-                                List<String> amigosDest = clientInterface.getClientInfo().getListaAmigos();
-                                amigosDest.add(this.getClient().getNombre());
-                                clientInterface.setListaAmigos(amigosDest);
-                                System.out.println(clientInterface.getClientInfo().getListaAmigos());
-
-                                this.getServer().actualizarClienteInfo(this.getClient());
-                                this.getServer().actualizarClienteInfo(clientInterface);
-                                clientInterface.confirmarAmistad(this.getClient().getNombre());
-                                this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                //Debug
-                                System.out.println(clientInterface.getClientInfo().getListaAmigos());
-                                System.out.println(clientInterface.getClientInfo().getListaAmigos());
-                                System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
-
-                                // Ventana gráfica
-                                this.getClient().addNotificacion("Aceptado");
-                                String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
-                                clientInterface.addNotificacion(acepto);
-                                this.getClient().notificarRecarga(clientInterface);
-                                this.recargar(stage, "PrincipalCliente-view.fxml");
-
-
-                            } catch (RemoteException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                        });
-
-                        // Asignar acción de rechazar
-                        rejectButton.setOnAction(event -> {
-                            ClientInterface clientInterface = null;
-                            try {
-                                clientInterface = this.getServer().getInterface(username);
-                                this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                // recargar la ventana gráfica
-                                this.getClient().addNotificacion("Rechazado");
-                                String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
-                                clientInterface.addNotificacion(rechazo);
-                                this.getClient().notificarRecarga(clientInterface);
-                                this.recargar(stage, "PrincipalCliente-view.fxml");
-
-                            } catch (RemoteException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                        });
-
-                        // Añadir solicitudes a la lista
-                        hbox.getChildren().addAll(label, acceptButton, rejectButton);
-                        listaSolicitudes.getItems().add(hbox);
-                    }
-                } else {
-                    listaSolicitudes.setItems(FXCollections.observableList(new ArrayList<>()));
-                }
-
-
-                // Agregar el evento de selección para la ListView de amigos
-                listaAmigos.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        // Extrae el nombre del amigo seleccionado
-                        String amigoSeleccionado = newValue.split(" ")[0];
-
-                        // Llamar al método para abrir la ventana correspondiente
-                        openAmigoView(amigoSeleccionado);
-
-                        // Restablece la selección a nula después de abrir la ventana
-                        Platform.runLater(() -> listaAmigos.getSelectionModel().clearSelection());
-                    }
                 });
 
+        };
 
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        // Programar la tarea para que se ejecute cada segundo
+        scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
 
-        });
+
     }
 
 
@@ -480,7 +367,7 @@ public class PrincipalController extends AbstractVentana {
     }
     //Metodo para imprimir ciertas notificaciones en la consola
     @FXML
-    public void printEnConsola(){
+    public void printEnConsola() {
 
         //Coge el tiempo actual para imprimirlo en formato texto
         LocalTime tiempoActual = LocalTime.now();
@@ -488,14 +375,31 @@ public class PrincipalController extends AbstractVentana {
         String tiempoFormateado=tiempoActual.format(formato);
 
         //Formatea el texto
-        for(String notificacion: this.getClient().getListaNotificaciones()){
+        List<String> notificacionesCopia = new ArrayList<>(this.getClient().getListaNotificaciones());
+
+        for (String notificacion : notificacionesCopia) {
+
             System.out.println(notificacion);
-            Text text = new Text("["+tiempoFormateado+"] "+notificacion+"\n");
-            consola.getChildren().add(0,text);
-            if(consola.getChildren().size() > MAX_MESSAGES){
+            Text text = new Text("[" + tiempoFormateado + "] " + notificacion + "\n");
+
+            try {
+                // Eliminar la notificación de la lista original
+                this.getClient().getNotificaciones().remove(notificacion);
+            } catch (Exception e) {
+                e.printStackTrace(); // Registra el error si ocurre
+            }
+
+            // Añadir el texto a la consola
+            consola.getChildren().add(0, text);
+            System.out.println(text);
+            //consola.requestLayout();
+
+            // Limitar el tamaño de la consola
+            if (consola.getChildren().size() > MAX_MESSAGES) {
                 consola.getChildren().remove(MAX_MESSAGES);
             }
         }
+
 
 
         //Añado un objeto texto a la consola.

@@ -7,7 +7,15 @@ import java.util.Map;
 
 public interface ClientInterface extends Remote {
 
+    void addAmigoOnline(String nombre, ClientInterface client) throws RemoteException;
     void addNotificacion(String notificacion) throws RemoteException;
+    List<String> getNotificaciones() throws RemoteException;
+
+    void addChat(Chat chat) throws RemoteException;
+
+    ClientInterface getInterface(String username) throws RemoteException;
+
+    void crearChat(ClientInterface clienteDestino) throws RemoteException;
 
     void recargarVentana() throws RemoteException;
 

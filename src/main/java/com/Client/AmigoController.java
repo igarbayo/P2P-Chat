@@ -7,16 +7,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AmigoController extends AbstractVentana{
 
@@ -30,16 +37,18 @@ public class AmigoController extends AbstractVentana{
     }
 
     // Atributo añadido para Amigo
-    private String amigo;
-    public String getAmigo() {
+    private ClientInterface amigo;
+    public ClientInterface getAmigo() {
         return amigo;
     }
-    public void setAmigo(String amigo) {
+    public void setAmigo(ClientInterface amigo) {
         this.amigo = amigo;
     }
 
     @FXML
-    private VBox chatBox;
+    private transient TextFlow textFlow;
+    @FXML
+    private transient ScrollPane scrollPane;
     @FXML
     private Label usernameAmigo;
     @FXML
@@ -54,66 +63,108 @@ public class AmigoController extends AbstractVentana{
     private TextArea textoAEnviar;
 
 
-    // Método para agregar un nuevo mensaje al chat
-    public void addMessage(String message) {
-        // Crear un nuevo Label para el mensaje
-        Label newMessage = new Label(message);
+    // Método para agregar texto al TextFlow
+    public void agregarTexto(Mensaje mensaje) {
+        //Coge el tiempo actual para imprimirlo en formato texto
+        LocalTime tiempoActual = LocalTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String tiempoFormateado=tiempoActual.format(formato);
+        Text text = new Text("[" + tiempoFormateado + "] " + mensaje.toString() + "\n");
+        textFlow.getChildren().add(text);
 
-        // Agregar el mensaje al VBox
-        chatBox.getChildren().add(newMessage);
-
-        // Opcional: Hacer que el ScrollPane siempre muestre el mensaje más reciente
-        chatBox.autosize(); // Esto ajustará el tamaño del VBox automáticamente
+        // Desplazar siempre hacia abajo al agregar un nuevo texto
+        desplazarHaciaAbajo();
     }
 
+    // Método para desplazar el ScrollPane hacia la parte inferior
+    private void desplazarHaciaAbajo() {
+        // Esto asegura que el ScrollPane se desplaza a la parte inferior
+        scrollPane.setVvalue(1.0);  // Establece el valor vertical al máximo (parte inferior)
+    }
 
+    // Método para vaciar el contendedor de chat
+    public void vaciarTextFlow() {
+        textFlow.getChildren().clear(); // Elimina todos los nodos dentro del TextFlow
+    }
+
+    // Método para recuperar el chat
+    public void recuperarChat(Chat chat) {
+        vaciarTextFlow();
+        if (chat!= null) {
+            for (Mensaje mensaje : chat.getMensajes()) {
+                agregarTexto(mensaje);
+            }
+        }
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Platform.runLater(() -> {
-
-            // Código de inicialización aquí
-            errorText.setVisible(false);
-
-            // Mostramos el nombre del usuario conectado
-            usernameAmigo.setText(amigo);
-
-            try {
-                System.out.println(amigo);
-                System.out.println(this.getServer().obtenerClienteInfo(amigo));
-                if (this.getClient().obtenerChat(amigo).isEmpty()) {
-                    this.getClient().crearChat(amigo);
-                }
-
-                // Obtenemos la conversación entre los dos usuarios
-                Optional<Chat> chat = this.getClient().obtenerChat(amigo);
-                //Mensaje message = new Mensaje(this.getClient().getInfo().getUsuario(), this.getServer().obtenerClienteInfo(amigo).getUsuario(), "Hola que tal");
 
 
-                if (chat.isPresent()) {
-                    //chat.get().anadirMensaje(message);
-                    this.getClient().actualizarChat(chat.get());
-                    this.getServer().actualizarClienteInfo(this.getClient());
-                    for (Mensaje m : chat.get().getMensajes()) {
-                        System.out.println(m);
-                        addMessage(m.toString());
+        // Crear el scheduler
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        // Definir la tarea a ejecutar
+        Runnable task = () -> {
+            Platform.runLater(() -> {
+
+                // Código de inicialización aquí
+                errorText.setVisible(false);
+
+                // Mostramos el nombre del usuario conectado
+                try {
+                    if (amigo.getNombre()!=null && amigo!=null) {
+                        usernameAmigo.setText(amigo.getNombre());
                     }
-                } else {
-                    System.out.println("No hay chat");
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
                 }
 
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+                try {
+                    //Debug
+                    System.out.println(amigo);
+                    System.out.println(this.getServer().obtenerClienteInfo(amigo.getNombre()));
+
+                    //Creamos/obtenemos el chat
+                    if (this.getClient().obtenerChat(amigo.getNombre()).isEmpty()) {
+                        this.getClient().crearChat(amigo);
+                    }
+                    // Obtenemos la conversación entre los dos usuarios
+                    Optional<Chat> chat = this.getClient().obtenerChat(amigo.getNombre());
+                    //Mensaje message = new Mensaje(this.getClient().getInfo().getUsuario(), this.getServer().obtenerClienteInfo(amigo).getUsuario(), "Hola que tal");
 
 
-        });
+
+                    if (chat.isPresent()) {
+                        // Imprimimos el chat
+                        recuperarChat(chat.get());
+                        //chat.get().anadirMensaje(message);
+                        this.getClient().actualizarChat(chat.get());
+                        this.getServer().actualizarClienteInfo(this.getClient());
+                        
+                    } else {
+                        System.out.println("No hay chat");
+                    }
+
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            });
+        };
+
+        // Programar la tarea para que se ejecute cada segundo
+        scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
+
+
+
     }
 
     public void onbotonDejar(ActionEvent actionEvent) {
         try {
             // Obtener la información del amigo
-            ClientInterface amigoInterface = this.getServer().getInterface(amigo);
+            ClientInterface amigoInterface = this.getClient().getInterface(amigo.getNombre());
             ClientInfo amigoInfo = amigoInterface.getClientInfo();
 
             // Eliminar la amistad
@@ -171,12 +222,12 @@ public class AmigoController extends AbstractVentana{
 
     public void onEnviar(ActionEvent actionEvent) {
         try {
-            ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(amigo);
+            ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(amigo.getNombre());
             if (amigoInfo.isOnline()) {
                 if (textoAEnviar.getText() !=null) {
-                    Mensaje mensaje = new Mensaje(this.getClient().getNombre(), amigo, textoAEnviar.getText());
+                    Mensaje mensaje = new Mensaje(this.getClient().getNombre(), amigo.getNombre(), textoAEnviar.getText());
                     // Obtenemos la conversación entre los dos usuarios
-                    Optional<Chat> chat = this.getClient().obtenerChat(amigo);
+                    Optional<Chat> chat = this.getClient().obtenerChat(amigo.getNombre());
                     if (chat.isPresent()) {
                         chat.get().anadirMensaje(mensaje);
                         this.getClient().actualizarChat(chat.get());
@@ -189,12 +240,12 @@ public class AmigoController extends AbstractVentana{
                         amigoInterface.recibirMensaje(mensaje);*/
 
                         this.getServer().actualizarClienteInfo(this.getClient());
-                        for (Mensaje m : chat.get().getMensajes()) {
+                        /*for (Mensaje m : chat.get().getMensajes()) {
                             System.out.println(m);
-                            addMessage(m.toString());
-                        }
+                            agregarTexto(m);
+                        }*/
 
-                        this.getClient().enviarMensaje(this.getServer().getInterface(amigo), mensaje);
+                        this.getClient().enviarMensaje(this.getClient().getInterface(amigo.getNombre()), mensaje);
                     } else {
                         System.out.println("No hay chat");
                     }
@@ -208,4 +259,6 @@ public class AmigoController extends AbstractVentana{
 
 
     }
+
+
 }

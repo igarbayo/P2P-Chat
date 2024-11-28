@@ -6,16 +6,6 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.AmigoController">
    <children>
-      <ScrollPane layoutX="27.0" layoutY="60.0" prefHeight="270.0" prefWidth="549.0">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
-               <children>
-                  <VBox fx:id="chatBox" layoutX="11.0" layoutY="5.0" prefHeight="261.0" prefWidth="527.0" />
-                   <!-- Los mensajes se agregan dinámicamente aquí -->
-               </children>
-            </AnchorPane>
-        </content>
-      </ScrollPane>
       <Label layoutX="27.0" layoutY="28.0" text="Amigo" />
       <Label fx:id="usernameAmigo" layoutX="86.0" layoutY="28.0" text="username" />
       <Button fx:id="botonDejar" layoutX="395.0" layoutY="24.0" mnemonicParsing="false" onAction="#onbotonDejar" text="Dejar amistad" textAlignment="RIGHT" />
@@ -23,6 +13,11 @@
       <Button fx:id="botonEnviar" layoutX="505.0" layoutY="353.0" mnemonicParsing="false" onAction="#onEnviar" text="Enviar" />
       <Button fx:id="botonVolver" layoutX="514.0" layoutY="24.0" mnemonicParsing="false" onAction="#onVolver" text="Volver" />
        <Text fx:id="errorText" fill="#ea3535" layoutX="166.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="no está en línea" wrappingWidth="182.95899963378906" />
+      <ScrollPane fx:id="scrollPane" layoutX="27.0" layoutY="57.0" prefHeight="277.0" prefWidth="536.0">
+          <content>
+              <TextFlow fx:id="textFlow" prefHeight="272.0" prefWidth="534.0" />
+          </content>
+      </ScrollPane>
 
    </children>
 </AnchorPane>

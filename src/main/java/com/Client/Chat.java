@@ -1,21 +1,18 @@
 package com.Client;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Chat {
 
     // Atributos
-    private List<String> clientes;
+    private Set<String> clientes;
     private List<Mensaje> mensajes;
 
     // Getters y setters
-    public List<String> getClientes() {
+    public Set<String> getClientes() {
         return clientes;
     }
-    public void setClientes(List<String> clientes) {
+    public void setClientes(Set<String> clientes) {
         if (clientes != null) {
             this.clientes = clientes;
         }
@@ -30,7 +27,7 @@ public class Chat {
     }
 
     // Constructor
-    public Chat(List<String> clientes) {
+    public Chat(Set<String> clientes) {
         if (clientes!=null) {
             this.clientes = clientes;
         }

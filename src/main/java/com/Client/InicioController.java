@@ -134,7 +134,7 @@ public class InicioController extends AbstractVentana {
                         client.setPrincipalController(controller);
                         this.setClient(client);
 
-                        String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + "se ha conectado";
+                        String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + " se ha conectado";
                         System.out.println(con);
                         this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), con);
                         for(ClientInterface amigo: this.getClient().getAmigosOnLine().values()){

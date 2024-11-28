@@ -42,7 +42,7 @@ public class LogoutController extends AbstractVentana{
             System.out.println(this.getClient().getInfo());
             for(String amigo : this.getClient().getInfo().getListaAmigos()){
                 try {
-                    if(this.getServer().getInterface(amigo).getOnline()){
+                    if(this.getClient().getInterface(amigo).getOnline()){
                         System.out.println("TRUE");
                     }else{
                         System.out.println("FALSE");
@@ -86,11 +86,16 @@ public class LogoutController extends AbstractVentana{
                 for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
 
                     this.getServer().actualizarClienteInfo(amigo);
-                    this.getClient().notificarRecarga(amigo);
+                    //this.getClient().notificarRecarga(amigo);
+                    System.out.println(amigo.getNotificaciones());
                 }
 
+            } else {
+                System.out.println("Amigos nulos");
             }
+
             this.getClient().cerrarConexion();
+
 
 
             //this.getClient().setInfo(null);

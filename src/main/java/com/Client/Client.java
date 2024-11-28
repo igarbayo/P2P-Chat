@@ -65,7 +65,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public void setAmigosOnLine(Map<String, ClientInterface> amigosOnLine) {
         this.amigosOnLine = amigosOnLine;
     }
-    public void addNotificacion(String notificacion) {
+
+    @Override
+    public void addNotificacion(String notificacion) throws RemoteException{
         listaNotificaciones.add(notificacion);
     }
 
@@ -84,6 +86,21 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     // Métodos
     @Override
+    public ClientInterface getInterface(String username) throws RemoteException {
+        // Añadir comprobacion con otro parametro de que sean amigas
+        return this.amigosOnLine.get(username);
+    }
+
+    @Override
+    public void addAmigoOnline(String nombre, ClientInterface client) throws RemoteException {
+        if (this.amigosOnLine != null && nombre != null && client != null) {
+            Map<String, ClientInterface> mapa = new HashMap<>(this.getAmigosOnline());
+            mapa.put(nombre, client);
+            this.setAmigosOnline(mapa);
+        }
+    }
+
+    @Override
     public PrincipalController getController() throws RemoteException {
         return principalController;
     }
@@ -94,6 +111,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String> getNotificaciones() throws RemoteException {
+        return this.getListaNotificaciones();
     }
 
     public void notificarRecarga(ClientInterface clienteObjetivo) {
@@ -181,7 +203,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             actualizarChat(chat.get());
         } else {
             System.out.println("Se crea el chat");
-            crearChat(mensaje.getClienteOrigen());
+            crearChat(this.getInterface(mensaje.getClienteOrigen()));
             recibirMensaje(mensaje);
         }
     }
@@ -310,15 +332,23 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         return Optional.empty();
     }
 
+    @Override
+    public void addChat(Chat chat) throws RemoteException {
+        if (this.chats!=null) {
+            this.chats.add(chat);
+        }
+    }
 
     // Crea un chat entre el origen y un cliente destino
-    public void crearChat(String clientDestino) {
-        if (clientDestino!=null && obtenerChat(clientDestino).isEmpty()) {
-            List<String> clientes = new ArrayList<>();
-            clientes.add(clientDestino);
+    @Override
+    public void crearChat(ClientInterface clientDestino) throws RemoteException {
+        if (clientDestino!=null && obtenerChat(clientDestino.getNombre()).isEmpty()) {
+            Set<String> clientes = new HashSet<>();
+            clientes.add(clientDestino.getNombre());
             clientes.add(info.getUsuario());
             Chat chat = new Chat(clientes);
             chats.add(chat);
+            clientDestino.addChat(chat);
         }
     }
 
