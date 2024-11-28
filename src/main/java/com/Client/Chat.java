@@ -1,8 +1,11 @@
 package com.Client;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Chat {
+public class Chat implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // Atributos
     private Set<String> clientes;

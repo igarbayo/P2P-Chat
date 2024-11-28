@@ -7,6 +7,8 @@ import java.util.Objects;
 
 public class ClientInfo implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     // Atributos
     private String usuario;
     private String contrasena;

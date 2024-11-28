@@ -83,6 +83,7 @@ public class LogoutController extends AbstractVentana{
                 String desc = "Amigo " + this.getClient().getInfo().getUsuario() + " desconectado";
                 System.out.println(desc);
                 this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), desc);
+                this.getClient().setOffline(this.getClient().getAmigosOnLine());
                 for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
 
                     this.getServer().actualizarClienteInfo(amigo);

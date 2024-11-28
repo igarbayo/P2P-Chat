@@ -104,9 +104,8 @@ public class InicioController extends AbstractVentana {
                     String decryptedPassword = ChaChaDecryption.decryptPassword(encryptedPassword, key, nonce);
 
                     if (password.equals(decryptedPassword)) {
+                        info.setOnline(true);
                         client.setInfo(info);
-                        client.getInfo().setOnline(true);
-
                         this.getServer().actualizarClienteInfo(client);
 
                         // Registro RMI
@@ -136,10 +135,13 @@ public class InicioController extends AbstractVentana {
 
                         String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + " se ha conectado";
                         System.out.println(con);
+
                         this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), con);
                         for(ClientInterface amigo: this.getClient().getAmigosOnLine().values()){
-                            this.getClient().notificarRecarga(amigo);
+                            //this.getClient().notificarRecarga(amigo);
                         }
+                        this.getClient().setOnline(this.getClient().getAmigosOnLine());
+
                         controller.setClient(client);
                         fxmlLoader.setController(controller);
 

@@ -1,14 +1,18 @@
 package com.Client;
 
 import java.io.Serializable;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Mensaje implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     // Atributos
     private String clienteOrigen;
     private String clienteDestino;
     private String contenido;
+    private String tiempoFormateado;
 
     // Getters y setters
     public String getClienteOrigen() {
@@ -47,6 +51,9 @@ public class Mensaje implements Serializable {
         if (contenido!=null) {
             this.contenido = contenido;
         }
+        LocalTime tiempoActual = LocalTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
+        tiempoFormateado=tiempoActual.format(formato);
     }
 
     // Equals para comparaciones
@@ -64,6 +71,6 @@ public class Mensaje implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + clienteOrigen + "] " + contenido;
+        return "[" + tiempoFormateado + "]" + " [de " + clienteOrigen + "] " + contenido;
     }
 }

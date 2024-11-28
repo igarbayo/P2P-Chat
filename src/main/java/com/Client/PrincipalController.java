@@ -73,16 +73,6 @@ public class PrincipalController extends AbstractVentana {
 
     }
 
-    /*public void setMensajePendiente(List<String> mensajePendiente) {
-        this.mensajePendiente = mensajePendiente;
-    }*/
-    public void anadirMensajePendiente(String mensaje) {
-        if (mensaje == null || mensaje.trim().isEmpty()) {
-            throw new IllegalArgumentException("El mensaje no puede ser null o vacío");
-        }
-        mensajePendiente.add(mensaje);
-        System.out.println("Mensaje añadido a pendientes: " + mensaje);
-    }
 
     private void openAmigoView(String amigoSeleccionado) {
         Platform.runLater(() -> {
@@ -92,9 +82,14 @@ public class PrincipalController extends AbstractVentana {
                 Scene scene = new Scene(fxmlLoader.load());
 
                 // Carga el stage
-                Stage stage = (Stage) usernameLabel.getScene().getWindow();
-                stage.setScene(scene);
-                stage.show();
+                if (usernameLabel.getScene() != null) {
+                    stage = (Stage) usernameLabel.getScene().getWindow();
+                    if (stage != null) {
+                        Stage stage = (Stage) usernameLabel.getScene().getWindow();
+                        stage.setScene(scene);
+                        stage.show();
+                    }
+                }
 
                 System.out.println("Desde origen: " + this.getServer().obtenerClienteInfo(amigoSeleccionado));
 
@@ -156,8 +151,11 @@ public class PrincipalController extends AbstractVentana {
                                 for (String username : amigosUsuarios) {
                                     try {
                                         ClientInterface amigo = this.getClient().getInterface(username);
-                                        String estado = amigo.getClientInfo().getUsuario() + (amigo.getClientInfo().isOnline() ? " [Online]" : " [Offline]");
-                                        amigosObservableList.add(estado);
+                                        if (amigo.getClientInfo()!=null && amigo.getNombre()!=null &&
+                                                this.getServer().obtenerClienteInfo(amigo.getNombre())!=null) {
+                                            String estado = amigo.getClientInfo().getUsuario() + (this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline() ? " [Online]" : " [Offline]");
+                                            amigosObservableList.add(estado);
+                                        }
                                     } catch (RemoteException e) {
                                         e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
                                     }

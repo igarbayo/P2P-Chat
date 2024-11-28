@@ -49,4 +49,9 @@ public interface ClientInterface extends Remote {
     //Metodo para recibir informacion del server
     void recibirNotificacion(String mensaje)throws RemoteException;
 
+    void setOffline(Map<String, ClientInterface> mapa) throws RemoteException;
+    void setOnline(Map<String, ClientInterface> mapa) throws RemoteException;
+
+
+
 }

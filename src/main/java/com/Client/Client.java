@@ -16,7 +16,7 @@ import com.Server.ServerInterface;
 
 //Serializable
 public class Client extends UnicastRemoteObject implements ClientInterface, Serializable {
-    //private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     // Atributos
     private ClientInfo info;
@@ -392,6 +392,26 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             this.addNotificacion(mensaje);
         }
 
+    }
+
+    @Override
+    public void setOffline(Map<String, ClientInterface> mapa) throws RemoteException {
+        if (mapa!=null) {
+            for (ClientInterface cliente : mapa.values()) {
+                ClientInterface origen = cliente.getAmigosOnline().get(this.getInfo().getUsuario());
+                origen.getClientInfo().setOnline(false);
+            }
+        }
+    }
+
+    @Override
+    public void setOnline(Map<String, ClientInterface> mapa) throws RemoteException {
+        if (mapa!=null) {
+            for (ClientInterface cliente : mapa.values()) {
+                ClientInterface origen = cliente.getAmigosOnline().get(this.getInfo().getUsuario());
+                origen.getClientInfo().setOnline(true);
+            }
+        }
     }
 
 

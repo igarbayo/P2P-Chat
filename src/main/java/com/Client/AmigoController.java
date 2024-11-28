@@ -66,10 +66,7 @@ public class AmigoController extends AbstractVentana{
     // Método para agregar texto al TextFlow
     public void agregarTexto(Mensaje mensaje) {
         //Coge el tiempo actual para imprimirlo en formato texto
-        LocalTime tiempoActual = LocalTime.now();
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String tiempoFormateado=tiempoActual.format(formato);
-        Text text = new Text("[" + tiempoFormateado + "] " + mensaje.toString() + "\n");
+        Text text = new Text(mensaje.toString() + "\n");
         textFlow.getChildren().add(text);
 
         // Desplazar siempre hacia abajo al agregar un nuevo texto
@@ -125,6 +122,11 @@ public class AmigoController extends AbstractVentana{
                     System.out.println(amigo);
                     System.out.println(this.getServer().obtenerClienteInfo(amigo.getNombre()));
 
+                    if (this.getServer().obtenerClienteInfo(amigo.getNombre()) != null) {
+                        errorText.setVisible(!this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline());
+                        botonEnviar.setDisable(!this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline());
+                    }
+
                     //Creamos/obtenemos el chat
                     if (this.getClient().obtenerChat(amigo.getNombre()).isEmpty()) {
                         this.getClient().crearChat(amigo);
@@ -173,7 +175,7 @@ public class AmigoController extends AbstractVentana{
             List<String> amigosDest = amigoInfo.getListaAmigos();
             amigosDest.remove(this.getClient().getNombre());
             amigoInterface.setListaAmigos(amigosDest);
-            System.out.println("Desde dejar: " + amigoInterface.getClientInfo().getListaAmigos() + " || " + amigosDest);
+            //System.out.println("Desde dejar: " + amigoInterface.getClientInfo().getListaAmigos() + " || " + amigosDest);
 
             // Actualizar la información en el servidor para ambos usuarios
             this.getServer().actualizarClienteInfo(this.getClient());
@@ -233,7 +235,7 @@ public class AmigoController extends AbstractVentana{
                         this.getClient().actualizarChat(chat.get());
 
                         // Recopilamos la información del destinatario
-                        System.out.println("Nombre: " + this.getClient().getAmigosOnLine());
+                        //System.out.println("Nombre: " + this.getClient().getAmigosOnLine());
                         //System.out.println(this.getClient().getAmigosOnLine().get(amigo).getClientInfo());
                         /*ClientInterface amigoInterface = this.getClient().getAmigosOnLine().get(amigo);
                         System.out.println(amigoInterface.getNombre());
@@ -251,7 +253,7 @@ public class AmigoController extends AbstractVentana{
                     }
                 }
             } else {
-                errorText.setVisible(true);
+                // nada
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
