@@ -69,6 +69,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         listaNotificaciones.add(notificacion);
     }
 
+    public List<String> getListaNotificaciones() {
+        return listaNotificaciones;
+    }
+
     // Constructor
     public Client() throws RemoteException {
         super();
@@ -92,21 +96,21 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         return false;
     }
 
-    public void notificarRecarga(ClientInterface clienteObjetivo, String mensaje) {
+    public void notificarRecarga(ClientInterface clienteObjetivo) {
         try {
-            clienteObjetivo.recargarVentana(mensaje);
+            clienteObjetivo.recargarVentana();
             System.out.println("1. Se ha solicitado la recarga de la ventana del cliente.");
         } catch (RemoteException e) {
             System.err.println("1. Error al notificar la recarga: " + e.getMessage());
         }
     }
     @Override
-    public void recargarVentana(String mensaje) throws RemoteException {
+    public void recargarVentana() throws RemoteException {
         // Asegúrate de que la lógica gráfica se ejecute en el hilo de JavaFX
         Platform.runLater(() -> {
             if (principalController != null) {
                 System.out.println("2. Se llama a recargar vista");
-                principalController.recargarVista(mensaje); // Llama al método de tu controlador
+                this.principalController.recargarVista(); // Llama al método de tu controlador
                 System.out.println(this.getInfo().getListaAmigos());
             } else {
                 System.out.println("2. No hay controlador disponible para recargar.");
@@ -154,17 +158,17 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     @Override
     public void notificarClientes(Map<String, ClientInterface> mapa, String mensaje) throws RemoteException {
-        Platform.runLater(() -> {
+
             if (mapa!=null && mensaje!=null) {
                 for (ClientInterface cliente : mapa.values()) {
                     try {
-                        cliente.recibirNotificacion(mensaje);
+                        cliente.addNotificacion(mensaje);
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
-        });
+
 
     }
 
@@ -354,8 +358,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     @Override
     public void recibirNotificacion(String mensaje) throws RemoteException {
-        if (this.info.isOnline()) {
-            addNotificacion(mensaje);
+        if (this.getClientInfo().isOnline()) {
+            this.addNotificacion(mensaje);
         }
 
     }

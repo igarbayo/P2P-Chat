@@ -137,7 +137,9 @@ public class InicioController extends AbstractVentana {
                         String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + "se ha conectado";
                         System.out.println(con);
                         this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), con);
-
+                        for(ClientInterface amigo: this.getClient().getAmigosOnLine().values()){
+                            this.getClient().notificarRecarga(amigo);
+                        }
                         controller.setClient(client);
                         fxmlLoader.setController(controller);
 

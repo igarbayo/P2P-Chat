@@ -142,7 +142,8 @@ public class AmigoController extends AbstractVentana{
             controller.setClient(this.getClient());
 
             String elim = "Eliminada amistad con " + this.getClient().getNombre();
-            this.getClient().notificarRecarga(amigoInterface, elim);
+            amigoInterface.addNotificacion(elim);
+            this.getClient().notificarRecarga(amigoInterface);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

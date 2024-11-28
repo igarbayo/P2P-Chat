@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
 public class LogoutController extends AbstractVentana{
@@ -39,6 +40,17 @@ public class LogoutController extends AbstractVentana{
         Platform.runLater(() -> {
             System.out.println("LOGOUT");
             System.out.println(this.getClient().getInfo());
+            for(String amigo : this.getClient().getInfo().getListaAmigos()){
+                try {
+                    if(this.getServer().getInterface(amigo).getOnline()){
+                        System.out.println("TRUE");
+                    }else{
+                        System.out.println("FALSE");
+                    }
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
     }
 
@@ -63,16 +75,22 @@ public class LogoutController extends AbstractVentana{
             controller.setIP(this.getClient().getIP());
             controller.setPuerto(this.getClient().getPuerto());
 
-            this.getClient().cerrarConexion();
-
             // Ponemos vacia la ClientInfo de la instancia de Client actual
             this.getClient().getInfo().setOnline(false);
             this.getServer().actualizarClienteInfo(this.getClient());
+
             if (this.getClient().getAmigosOnLine()!=null) {
                 String desc = "Amigo " + this.getClient().getInfo().getUsuario() + " desconectado";
                 System.out.println(desc);
                 this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), desc);
+                for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
+
+                    this.getServer().actualizarClienteInfo(amigo);
+                    this.getClient().notificarRecarga(amigo);
+                }
+
             }
+            this.getClient().cerrarConexion();
 
 
             //this.getClient().setInfo(null);

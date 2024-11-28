@@ -360,6 +360,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }
 
     @Override
+    public void eliminarDeClientesConectados(ClientInterface cliente) throws RemoteException {
+        if(cliente != null) {
+            clientesEnLinea.remove(cliente.getNombre());
+        }
+    }
+
+    @Override
     public void notificarAmigos(ClientInterface client, String mensaje) throws RemoteException {
         Map<String, ClientInterface> amigos = this.obtenerAmigosEnLinea(client);
         if (amigos!=null && !amigos.isEmpty()) {

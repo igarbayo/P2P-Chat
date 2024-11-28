@@ -55,7 +55,7 @@ public abstract class AbstractVentana implements Initializable {
     }
 
 
-    public void recargar(Stage stage, String string, List<String> mensajePendiente) {
+    public void recargar(Stage stage, String string) {
         Platform.runLater(() -> {
             // Cargar el archivo FXML
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(string));
@@ -75,7 +75,6 @@ public abstract class AbstractVentana implements Initializable {
             controller.setServer(this.getServer());
             this.setClient(client);
             controller.setClient(client);
-            controller.setMensajePendiente(mensajePendiente);
             fxmlLoader.setController(controller);
         });
     }

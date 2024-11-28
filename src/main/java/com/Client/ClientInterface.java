@@ -9,7 +9,7 @@ public interface ClientInterface extends Remote {
 
     void addNotificacion(String notificacion) throws RemoteException;
 
-    void recargarVentana(String mensaje) throws RemoteException;
+    void recargarVentana() throws RemoteException;
 
     String getNombre() throws RemoteException;
 

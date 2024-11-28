@@ -30,5 +30,5 @@ public interface ServerInterface extends Remote {
     List<String> obtenerAmigos(String usuario) throws RemoteException;
     void actualizarGrupoAmistad() throws RemoteException;
     void notificar(List<ClientInterface> clientes, String mensaje) throws RemoteException;
-
+    void eliminarDeClientesConectados(ClientInterface cliente) throws RemoteException;
 } // end interface

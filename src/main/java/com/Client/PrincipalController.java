@@ -57,25 +57,25 @@ public class PrincipalController extends AbstractVentana {
         this.amigosObservableList = amigosObservableList;
     }
 
-    public List<String> getMensajePendiente() {
+    /*public List<String> getMensajePendiente() {
         return mensajePendiente;
-    }
+    }*/
 
-    public void recargarVista(String mensaje) {
+    public void recargarVista() {
         // Lógica para actualizar la ventana
         Platform.runLater(() -> {
 
             System.out.println("3. Se procede a recargar la vista.");
 
-            if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
+            /*if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
                 this.mensajePendiente = new ArrayList<>();
-            }
+            }*/
 
             // Mostramos el nombre del usuario conectado
             usernameLabel.setText(this.getClient().getInfo().getUsuario());
             scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-            this.mensajePendiente.add(mensaje);
+            this.printEnConsola();
+            /*this.mensajePendiente.add(mensaje);
             for (String mensaje2: this.mensajePendiente) {
                 if (mensaje2!=null) {
                     System.out.println("Mensaje: " + mensaje2);
@@ -83,7 +83,7 @@ public class PrincipalController extends AbstractVentana {
 
                 }
 
-            }
+            }*/
 
             try {
 
@@ -91,7 +91,6 @@ public class PrincipalController extends AbstractVentana {
 
                 if (this.getServer() != null && this.getClient() != null) {
                     List<String> amigosUsuarios = this.getServer().obtenerAmigos(this.getClient().getInfo().getUsuario());
-
                     for (String username : amigosUsuarios) {
                         try {
                             ClientInterface amigo = this.getServer().getInterface(username);
@@ -101,9 +100,10 @@ public class PrincipalController extends AbstractVentana {
                             e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
                         }
                     }
+                    listaAmigos.setItems(amigosObservableList);
                 }
 
-                listaAmigos.setItems(amigosObservableList);
+
 
 
                 // Manejo de lista de solicitudes
@@ -129,9 +129,10 @@ public class PrincipalController extends AbstractVentana {
                                 clientInterface.setListaAmigos(amigosDest);
                                 System.out.println(clientInterface.getClientInfo().getListaAmigos());
 
+
+                                clientInterface.confirmarAmistad(this.getClient().getNombre());
                                 this.getServer().actualizarClienteInfo(this.getClient());
                                 this.getServer().actualizarClienteInfo(clientInterface);
-                                clientInterface.confirmarAmistad(this.getClient().getNombre());
                                 this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
 
                                 //Debug
@@ -139,10 +140,11 @@ public class PrincipalController extends AbstractVentana {
                                 System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
 
                                 // Ventana gráfica
-                                this.mensajePendiente.add("aceptado");
+                                this.getClient().addNotificacion("Aceptado");
                                 String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
-                                this.getClient().notificarRecarga(clientInterface, acepto);
-                                this.recargar(stage, "PrincipalCliente-view.fxml", this.mensajePendiente);
+                                clientInterface.addNotificacion(acepto);
+                                this.getClient().notificarRecarga(clientInterface);
+                                this.recargar(stage, "PrincipalCliente-view.fxml");
 
 
                             } catch (RemoteException e) {
@@ -159,10 +161,12 @@ public class PrincipalController extends AbstractVentana {
                                 this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
 
                                 // recargar la ventana gráfica
-                                this.mensajePendiente.add("rechazado");
+
+                                this.getClient().addNotificacion("rechazado");
                                 String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
-                                this.getClient().notificarRecarga(clientInterface, rechazo);
-                                this.recargar(stage, "PrincipalCliente-view.fxml", this.mensajePendiente);
+                                clientInterface.addNotificacion(rechazo);
+                                this.getClient().notificarRecarga(clientInterface);
+                                this.recargar(stage, "PrincipalCliente-view.fxml");
 
                             } catch (RemoteException e) {
                                 throw new RuntimeException(e);
@@ -201,9 +205,9 @@ public class PrincipalController extends AbstractVentana {
         });
     }
 
-    public void setMensajePendiente(List<String> mensajePendiente) {
+    /*public void setMensajePendiente(List<String> mensajePendiente) {
         this.mensajePendiente = mensajePendiente;
-    }
+    }*/
     public void anadirMensajePendiente(String mensaje) {
         if (mensaje == null || mensaje.trim().isEmpty()) {
             throw new IllegalArgumentException("El mensaje no puede ser null o vacío");
@@ -256,20 +260,16 @@ public class PrincipalController extends AbstractVentana {
                 safeHandleWindowClose();
             });
 
-            if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
+            /*if (this.mensajePendiente== null || this.mensajePendiente.isEmpty()) {
                 this.mensajePendiente = new ArrayList<>();
-            }
+            }*/
 
             // Mostramos el nombre del usuario conectado
             usernameLabel.setText(this.getClient().getInfo().getUsuario());
             scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
             //this.mensajePendiente.add(mensaje);
-            for (String mensaje2: this.mensajePendiente) {
-                if (mensaje2!=null) {
-                    printEnConsola(mensaje2);
-                }
-            }
+            printEnConsola();
 
             try {
 
@@ -287,9 +287,10 @@ public class PrincipalController extends AbstractVentana {
                             e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
                         }
                     }
+                    listaAmigos.setItems(amigosObservableList);
                 }
 
-                listaAmigos.setItems(amigosObservableList);
+
                 //Si entra desde logIn mando notificación a sus amigos conectados de que hay un nuevo ususario.
                 /*if(this.getClient().getIsNew()==1){
                     if(!amigosObservableList.isEmpty()){
@@ -339,10 +340,11 @@ public class PrincipalController extends AbstractVentana {
                                 System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
 
                                 // Ventana gráfica
-                                this.mensajePendiente.add("aceptado");
+                                this.getClient().addNotificacion("Aceptado");
                                 String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
-                                this.getClient().notificarRecarga(clientInterface, acepto);
-                                this.recargar(stage, "PrincipalCliente-view.fxml", this.mensajePendiente);
+                                clientInterface.addNotificacion(acepto);
+                                this.getClient().notificarRecarga(clientInterface);
+                                this.recargar(stage, "PrincipalCliente-view.fxml");
 
 
                             } catch (RemoteException e) {
@@ -359,10 +361,11 @@ public class PrincipalController extends AbstractVentana {
                                 this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
 
                                 // recargar la ventana gráfica
-                                this.mensajePendiente.add("rechazado");
+                                this.getClient().addNotificacion("Rechazado");
                                 String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
-                                this.getClient().notificarRecarga(clientInterface, rechazo);
-                                this.recargar(stage, "PrincipalCliente-view.fxml", this.mensajePendiente);
+                                clientInterface.addNotificacion(rechazo);
+                                this.getClient().notificarRecarga(clientInterface);
+                                this.recargar(stage, "PrincipalCliente-view.fxml");
 
                             } catch (RemoteException e) {
                                 throw new RuntimeException(e);
@@ -477,7 +480,7 @@ public class PrincipalController extends AbstractVentana {
     }
     //Metodo para imprimir ciertas notificaciones en la consola
     @FXML
-    public void printEnConsola(String mensaje){
+    public void printEnConsola(){
 
         //Coge el tiempo actual para imprimirlo en formato texto
         LocalTime tiempoActual = LocalTime.now();
@@ -485,16 +488,23 @@ public class PrincipalController extends AbstractVentana {
         String tiempoFormateado=tiempoActual.format(formato);
 
         //Formatea el texto
-        Text text = new Text("["+tiempoFormateado+"] "+mensaje+"\n");
-
-        //Añado un objeto texto a la consola.
-        //borra el texto antiguo
-        consola.getChildren().add(0,text);
-        if(consola.getChildren().size() > MAX_MESSAGES){
-            consola.getChildren().remove(MAX_MESSAGES);
+        for(String notificacion: this.getClient().getListaNotificaciones()){
+            System.out.println(notificacion);
+            Text text = new Text("["+tiempoFormateado+"] "+notificacion+"\n");
+            consola.getChildren().add(0,text);
+            if(consola.getChildren().size() > MAX_MESSAGES){
+                consola.getChildren().remove(MAX_MESSAGES);
+            }
         }
 
 
+        //Añado un objeto texto a la consola.
+        //borra el texto antiguo
+
+
+
+
     }
+
 
 }

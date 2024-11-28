@@ -33,7 +33,7 @@ public class ClientInfo implements Serializable {
         this.listaAmigos = listaAmigos;
     }
     public boolean isOnline() {
-        return online;
+        return this.online;
     }
     public void setOnline(boolean online) {
         this.online = online;

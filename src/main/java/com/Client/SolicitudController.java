@@ -64,7 +64,8 @@ public class SolicitudController extends AbstractVentana {
                         // Agregar esta solicitud a la lista de solicitudes del destinatario
                         this.getServer().anadirSolicitud(this.getClient().getNombre(), destinatario.getNombre());
                         String solic = "Recibida solicitud de " + this.getClient().getNombre();
-                        this.getClient().notificarRecarga(destinatario, solic);
+                        destinatario.addNotificacion(solic);
+                        this.getClient().notificarRecarga(destinatario);
                         stage.close();
                     } else {
                         valido = false;
