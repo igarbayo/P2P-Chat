@@ -377,6 +377,11 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
+    public boolean estaLogueado(String usuario) throws RemoteException {
+        return this.clientesEnLinea.containsKey(usuario);
+    }
+
 
 
 

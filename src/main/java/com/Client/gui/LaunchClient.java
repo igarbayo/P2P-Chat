@@ -1,14 +1,9 @@
-package com.Client;
+package com.Client.gui;
 
-import com.Server.ServerInterface;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.util.Arrays;
 
 public class LaunchClient extends Application {
     ConexionController conexionControlador;
@@ -18,6 +13,15 @@ public class LaunchClient extends Application {
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader conexionLoader = new FXMLLoader(getClass().getResource("ConexionCliente-view.fxml"));
         Scene conexionScene= new Scene(conexionLoader.load());
+
+        // CSS
+        conexionScene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+        conexionScene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+        conexionScene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+        conexionScene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+        conexionScene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+        conexionScene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
+
         Stage conexionStage = new Stage();
         conexionStage.setScene(conexionScene);
         conexionStage.setResizable(false);

@@ -39,6 +39,14 @@ public class Mensaje implements Serializable {
             this.contenido = contenido;
         }
     }
+    public String getTiempoFormateado() {
+        return tiempoFormateado;
+    }
+    public void setTiempoFormateado(String tiempoFormateado) {
+        if (tiempoFormateado!=null) {
+            this.tiempoFormateado = tiempoFormateado;
+        }
+    }
 
     // Constructores
     public Mensaje(String clienteOrigen, String clienteDestino, String contenido) {
@@ -54,6 +62,21 @@ public class Mensaje implements Serializable {
         LocalTime tiempoActual = LocalTime.now();
         DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
         tiempoFormateado=tiempoActual.format(formato);
+    }
+
+    public Mensaje(String clienteOrigen, String clienteDestino, String contenido, String tiempoFormateado) {
+        if (clienteOrigen!=null) {
+            this.clienteOrigen = clienteOrigen;
+        }
+        if (clienteDestino!=null) {
+            this.clienteDestino = clienteDestino;
+        }
+        if (contenido!=null) {
+            this.contenido = contenido;
+        }
+        if (tiempoFormateado!=null) {
+            this.tiempoFormateado = tiempoFormateado;
+        }
     }
 
     // Equals para comparaciones

@@ -1,0 +1,65 @@
+@import url("colors.css");
+
+.text-id {
+    -fx-fill: -fx--white;
+}
+
+/* Estilo para el TextFlow */
+.chat-flow {
+    -fx-padding: 5;
+}
+
+/* Estilo para los mensajes de usuario 1 (izquierda) */
+.user-1-message {
+    -fx-background-color: #DCF8C6; /* Color verde claro */
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+    -fx-margin: 5px;
+    -fx-text-fill: black;
+    -fx-max-width: 300px;
+    -fx-alignment: top-left;
+}
+
+/* Estilo para los mensajes de usuario 2 (derecha) */
+.user-2-message {
+    -fx-background-color: #ffffff; /* Blanco */
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+    -fx-margin: 5px;
+    -fx-text-fill: black;
+    -fx-max-width: 300px;
+    -fx-alignment: top-right;
+}
+
+#vbox > .label {
+    -fx-background-color: -fx--neutral-blue;
+    -fx-text-fill: -fx--black;
+}
+
+.label {
+    -fx-text-fill: -fx--white;
+}
+.text-field {
+    -fx-background-radius: 3;
+    -fx-background-color: -fx--light-gray;
+    -fx-text-fill: -fx--white;
+    -fx-highlight-fill: -fx--highlight;
+    -fx-highlight-text-fill: -fx--black;
+}
+.text-field:focused {
+    -fx-border-color: -fx--highlight;
+    -fx-border-radius: 3;
+    -fx-border-width: 3;
+}
+
+.error-text-field {
+    -fx-background-color: -fx--light-gray;
+    -fx-text-fill: -fx--white;
+    -fx-border-color: -fx--error-color;
+    -fx-border-radius: 3;
+}
+.error-text-field:focused {
+    -fx-border-color: -fx--error-color;
+    -fx-border-radius: 3;
+    -fx-border-width: 3;
+}

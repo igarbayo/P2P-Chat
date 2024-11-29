@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="anchorPane" prefHeight="250.0" prefWidth="550.0" styleClass="anchor-pane" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.gui.InicioController">
+   <children>
+      <ImageView fx:id="imageView" fitHeight="60.0" fitWidth="63.0" layoutX="14.0" layoutY="14.0">
+         <image>
+            <Image url="https://www.iconsdb.com/icons/preview/white/talk-xxl.png" />
+         </image>
+      </ImageView>
+      <Text layoutX="152.0" layoutY="59.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Username" textAlignment="RIGHT">
+      </Text>
+      <Text layoutX="154.0" layoutY="118.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Password" textAlignment="RIGHT">
+      </Text>
+      <TextField fx:id="usernameTextField" layoutX="245.0" layoutY="42.0" promptText="Nombre de usuario" />
+      <Button layoutX="279.0" layoutY="153.0" mnemonicParsing="false" onAction="#onBotonLogin" text="Iniciar sesión" />
+      <Button layoutX="284.0" layoutY="203.0" mnemonicParsing="false" onAction="#onBotonRegistrar" text="Registrarse" />
+      <Text fx:id="errorText" fill="#ea3535" layoutX="26.0" layoutY="178.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mensaje de error" textAlignment="CENTER" wrappingWidth="158.95899963378906" />
+      <PasswordField fx:id="passwordTextField" layoutX="245.0" layoutY="101.0" promptText="Contraseña" />
+   </children>
+</AnchorPane>

@@ -1,7 +1,9 @@
-package com.Client;
+package com.Client.gui;
 
+import com.Client.ClientInterface;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Label;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -14,12 +16,14 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
-public class LogoutController extends AbstractVentana{
+public class LogoutController extends AbstractVentana {
 
     @FXML
     private Button botonSi;
     @FXML
     private Button botonNo;
+    @FXML
+    private Label usernameLabel;
 
     // Para cambiar la ventana anterior
     private Stage oldStage;
@@ -38,6 +42,9 @@ public class LogoutController extends AbstractVentana{
     @Override
     public void initialize(URL url, ResourceBundle resources) {
         Platform.runLater(() -> {
+            // Mostramos el nombre del usuario conectado
+            usernameLabel.setText(this.getClient().getInfo().getUsuario());
+
             System.out.println("LOGOUT");
             System.out.println(this.getClient().getInfo());
             for(String amigo : this.getClient().getInfo().getListaAmigos()){
@@ -61,13 +68,20 @@ public class LogoutController extends AbstractVentana{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("InicioCliente-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
 
+            // CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
+
             oldStage.setScene(scene);
             oldStage.show();
 
             // Obtener el Stage actual a partir del control (ej. un botón)
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             stage.close(); // Cierra el Stage
-
             // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
             InicioController controller = fxmlLoader.getController();
             controller.setServer(this.getServer());
@@ -75,29 +89,29 @@ public class LogoutController extends AbstractVentana{
             controller.setIP(this.getClient().getIP());
             controller.setPuerto(this.getClient().getPuerto());
 
-            // Ponemos vacia la ClientInfo de la instancia de Client actual
-            this.getClient().getInfo().setOnline(false);
-            this.getServer().actualizarClienteInfo(this.getClient());
+            if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
+                // Ponemos vacia la ClientInfo de la instancia de Client actual
+                this.getClient().getInfo().setOnline(false);
+                this.getServer().actualizarClienteInfo(this.getClient());
 
-            if (this.getClient().getAmigosOnLine()!=null) {
-                String desc = "Amigo " + this.getClient().getInfo().getUsuario() + " desconectado";
-                System.out.println(desc);
-                this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), desc);
-                this.getClient().setOffline(this.getClient().getAmigosOnLine());
-                for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
+                if (this.getClient().getAmigosOnLine()!=null) {
+                    String desc = "Amigo " + this.getClient().getInfo().getUsuario() + " desconectado";
+                    System.out.println(desc);
+                    this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), desc);
+                    this.getClient().setOffline(this.getClient().getAmigosOnLine());
+                    for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
 
-                    this.getServer().actualizarClienteInfo(amigo);
-                    //this.getClient().notificarRecarga(amigo);
-                    System.out.println(amigo.getNotificaciones());
+                        this.getServer().actualizarClienteInfo(amigo);
+                        //this.getClient().notificarRecarga(amigo);
+                        System.out.println(amigo.getNotificaciones());
+                    }
+
+                } else {
+                    System.out.println("Amigos nulos");
                 }
 
-            } else {
-                System.out.println("Amigos nulos");
+                this.getClient().cerrarConexion();
             }
-
-            this.getClient().cerrarConexion();
-
-
 
             //this.getClient().setInfo(null);
 

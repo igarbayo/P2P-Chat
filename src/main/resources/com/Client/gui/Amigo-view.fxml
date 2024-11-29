@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="900.0" styleClass="anchor-pane" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Client.gui.AmigoController">
+   <children>
+       <ImageView fitHeight="60.0" fitWidth="63.0" layoutX="14.0" layoutY="14.0">
+           <image>
+               <Image url="https://www.iconsdb.com/icons/preview/white/talk-xxl.png" />
+           </image>
+       </ImageView>
+       <Label layoutX="27.0" layoutY="97.0" text="Usuario:" />
+       <Label fx:id="usernameLabel" layoutX="46.0" layoutY="127.0" prefHeight="24.0" prefWidth="86.0" text="username" textAlignment="CENTER" />
+
+       <Label layoutX="159.0" layoutY="32.0" text="Amigo:" />
+      <Label fx:id="usernameAmigo" layoutX="172.0" layoutY="74.0" text="username" />
+      <Button fx:id="botonDejar" layoutX="750.0" layoutY="28.0" mnemonicParsing="false" onAction="#onbotonDejar" text="Dejar amistad" textAlignment="RIGHT" />
+      <TextArea fx:id="textoAEnviar" layoutX="150.0" layoutY="422.0" prefHeight="60.0" prefWidth="614.0" promptText="Escriba el mensaje" />
+      <Button fx:id="botonEnviar" layoutX="774.0" layoutY="422.0" mnemonicParsing="false" onAction="#onEnviar" prefHeight="60.0" prefWidth="86.0" text="Enviar" />
+      <Button fx:id="botonVolver" layoutX="775.0" layoutY="70.0" mnemonicParsing="false" onAction="#onVolver" text="Volver" />
+       <Text fx:id="errorText" fill="#ea3535" layoutX="301.0" layoutY="87.0" strokeType="OUTSIDE" strokeWidth="0.0" text="no está en línea" wrappingWidth="182.95899963378906" />
+      <ScrollPane fx:id="scrollPane" layoutX="150.0" layoutY="113.0" prefHeight="291.0" prefWidth="709.0">
+          <content>
+              <VBox fx:id="vbox" prefHeight="292.0" prefWidth="686.0" />
+          </content>
+      </ScrollPane>
+       <Line endX="-114.0" endY="471.0" layoutX="233.0" layoutY="29.0" startX="-114.0" startY="-29.0" stroke="#222831" />
+   </children>
+</AnchorPane>

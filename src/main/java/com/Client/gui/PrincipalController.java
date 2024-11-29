@@ -1,17 +1,18 @@
-package com.Client;
+package com.Client.gui;
 
-import com.Server.ServerInterface;
+import com.Client.ClientInterface;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
 import javafx.event.ActionEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -27,7 +28,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PrincipalController extends AbstractVentana {
@@ -81,6 +81,14 @@ public class PrincipalController extends AbstractVentana {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Amigo-view.fxml"));
                 Scene scene = new Scene(fxmlLoader.load());
 
+                // CSS
+                scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
+
                 // Carga el stage
                 if (usernameLabel.getScene() != null) {
                     stage = (Stage) usernameLabel.getScene().getWindow();
@@ -129,17 +137,17 @@ public class PrincipalController extends AbstractVentana {
                             safeHandleWindowClose();
                         });
                     }
-                    }
+                }
 
-                    // Mostramos el nombre del usuario conectado
-                    usernameLabel.setText(this.getClient().getInfo().getUsuario());
-                    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                // Mostramos el nombre del usuario conectado
+                usernameLabel.setText(this.getClient().getInfo().getUsuario());
+                scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
-                    //this.mensajePendiente.add(mensaje);
-                    printEnConsola();
+                //this.mensajePendiente.add(mensaje);
+                printEnConsola();
 
-                    try {
-
+                try {
+                    if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
                         // Manejo de amigos
                         lockAmigos.lock();
                         try {
@@ -151,9 +159,8 @@ public class PrincipalController extends AbstractVentana {
                                 for (String username : amigosUsuarios) {
                                     try {
                                         ClientInterface amigo = this.getClient().getInterface(username);
-                                        if (amigo.getClientInfo()!=null && amigo.getNombre()!=null &&
-                                                this.getServer().obtenerClienteInfo(amigo.getNombre())!=null) {
-                                            String estado = amigo.getClientInfo().getUsuario() + (this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline() ? " [Online]" : " [Offline]");
+                                        if (this.getServer().obtenerClienteInfo(username) !=null) {
+                                            String estado = username + (this.getServer().obtenerClienteInfo(username).isOnline() ? " [Online]" : " [Offline]");
                                             amigosObservableList.add(estado);
                                         }
                                     } catch (RemoteException e) {
@@ -177,9 +184,15 @@ public class PrincipalController extends AbstractVentana {
                                 solicitudes = this.getServer().getSolicitudes(this.getClient());
                                 for (String username : solicitudes) {
                                     HBox hbox = new HBox();
+                                    hbox.setAlignment(Pos.CENTER_LEFT);
+                                    // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
+                                    Region spacer = new Region();
+                                    HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
                                     Label label = new Label(username);
                                     Button acceptButton = new Button("V");
+                                    acceptButton.setStyle("-fx-background-color: green;");
                                     Button rejectButton = new Button("X");
+                                    rejectButton.setStyle("-fx-background-color: red;");
 
                                     // Asignar acción de aceptar
                                     acceptButton.setOnAction(event -> {
@@ -213,7 +226,7 @@ public class PrincipalController extends AbstractVentana {
                                             String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
                                             clientInterface.addNotificacion(acepto);
                                             //this.getClient().notificarRecarga(clientInterface);
-                                            this.recargar(stage, "PrincipalCliente-view.fxml");
+                                            //this.recargar(stage, "PrincipalCliente-view.fxml");
 
 
                                         } catch (RemoteException e) {
@@ -234,7 +247,7 @@ public class PrincipalController extends AbstractVentana {
                                             String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
                                             clientInterface.addNotificacion(rechazo);
                                             //this.getClient().notificarRecarga(clientInterface);
-                                            this.recargar(stage, "PrincipalCliente-view.fxml");
+                                            //this.recargar(stage, "PrincipalCliente-view.fxml");
 
                                         } catch (RemoteException e) {
                                             throw new RuntimeException(e);
@@ -243,7 +256,7 @@ public class PrincipalController extends AbstractVentana {
                                     });
 
                                     // Añadir solicitudes a la lista
-                                    hbox.getChildren().addAll(label, acceptButton, rejectButton);
+                                    hbox.getChildren().addAll(label, spacer, acceptButton, rejectButton);
                                     if (!listaSolicitudes.getItems().contains(hbox)) {
                                         listaSolicitudes.getItems().add(hbox);
                                     }
@@ -274,18 +287,17 @@ public class PrincipalController extends AbstractVentana {
                         } finally {
                             lockAmigos.unlock();
                         }
-
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
 
-                });
+            });
 
         };
 
         // Programar la tarea para que se ejecute cada segundo
         scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
-
 
     }
 
@@ -297,6 +309,14 @@ public class PrincipalController extends AbstractVentana {
             // Cargar el archivo FXML
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Solicitud-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
+
+            // CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
 
             // Crear un nuevo Stage para la nueva ventana
             Stage newStage = new Stage();
@@ -314,37 +334,19 @@ public class PrincipalController extends AbstractVentana {
     }
 
     @FXML
-    public void onAbandonar(ActionEvent event) {
-        try {
-            // Cargar el archivo FXML
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Abandonar-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-
-            // Crear un nuevo Stage para la nueva ventana
-            Stage newStage = new Stage();
-            newStage.setScene(scene);
-            newStage.show();
-            // Guarda el stage actual
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-
-            // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
-            AbandonarController controller = fxmlLoader.getController();
-            controller.setOldStage(stage);
-            controller.setServer(this.getServer());
-            controller.setClient(this.getClient());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-
-    @FXML
     public void onLogout(ActionEvent event) {
         try {
             // Cargar el archivo FXML
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Logout-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
+
+            // CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
 
             // Crear un nuevo Stage para la nueva ventana
             Stage newStage = new Stage();

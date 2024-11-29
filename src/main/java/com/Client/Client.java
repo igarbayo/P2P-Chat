@@ -1,17 +1,13 @@
 package com.Client;
 
-import com.Server.ServerInterface;
-import javafx.application.Platform;
+import com.Client.gui.PrincipalController;
+import com.Server.Server;
+
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-import java.util.stream.Collectors;
-import com.Server.ServerInterface;
-
 
 
 //Serializable
@@ -26,7 +22,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     private Map<String, ClientInterface> amigosOnLine;
     private List<String> listaNotificaciones;
 
-
+    // Getters y setters
     public String getIP() {
         return IP;
     }
@@ -53,24 +49,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         this.chats = chats;
     }
     private PrincipalController principalController;
-
     public PrincipalController getPrincipalController() {
         return principalController;
     }
-
     public Map<String, ClientInterface> getAmigosOnLine() {
         return amigosOnLine;
     }
-
     public void setAmigosOnLine(Map<String, ClientInterface> amigosOnLine) {
         this.amigosOnLine = amigosOnLine;
     }
-
-    @Override
-    public void addNotificacion(String notificacion) throws RemoteException{
-        listaNotificaciones.add(notificacion);
-    }
-
     public List<String> getListaNotificaciones() {
         return listaNotificaciones;
     }
@@ -85,6 +72,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
     // Métodos
+    @Override
+    public void addNotificacion(String notificacion) throws RemoteException{
+        listaNotificaciones.add(notificacion);
+    }
+
     @Override
     public ClientInterface getInterface(String username) throws RemoteException {
         // Añadir comprobacion con otro parametro de que sean amigas

@@ -1,4 +1,4 @@
-package com.Client;
+package com.Client.gui;
 
 import com.Server.ServerInterface;
 import javafx.event.ActionEvent;
@@ -54,6 +54,14 @@ public class ConexionController implements Initializable {
             // Cargar el archivo FXML
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("InicioCliente-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
+
+            // CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
 
             // Carga el stage
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();

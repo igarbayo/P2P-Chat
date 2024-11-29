@@ -1,17 +1,15 @@
-package com.Client;
+package com.Client.gui;
 
+import com.Client.Client;
 import com.Server.ServerInterface;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
-import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.List;
 
 public abstract class AbstractVentana implements Initializable {
 

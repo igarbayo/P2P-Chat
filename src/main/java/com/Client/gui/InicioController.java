@@ -1,14 +1,17 @@
-package com.Client;
+package com.Client.gui;
 
-import com.Server.Server;
+import com.Client.*;
+import com.Client.security.Bcrypt;
+import com.Client.security.ChaChaDecryption;
+import com.Client.security.ChaChaEncryption;
 import com.Server.ServerInterface;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -16,14 +19,13 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.*;
 import java.net.URL;
-import java.rmi.RemoteException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class InicioController extends AbstractVentana {
 
+    @FXML
+    public ImageView imageView;
     // Atributos
     private String IP;
     private int puerto;
@@ -72,38 +74,12 @@ public class InicioController extends AbstractVentana {
             client.setInfo(info);
 
             if (this.getServer().existeCliente(client)) {
-                // Leer la clave y el nonce desde el archivo de resources
-                String userDir = "src/main/resources/com/Client/" + username + "-key-nonce.txt";
-                File file = new File(userDir);
 
-                if (!file.exists()) {
-                    mostrarError("No se encontró el archivo de clave y nonce para el usuario");
-                    return;
-                }
-
-                String keyHex = null;
-                String nonceHex = null;
-
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    keyHex = reader.readLine().split(":")[1].trim();
-                    nonceHex = reader.readLine().split(":")[1].trim();
-                }
-
-                if (keyHex == null || nonceHex == null) {
-                    mostrarError("Error al leer la clave y el nonce del archivo");
-                    return;
-                }
-
-                // Convertir la clave y el nonce de hex a bytes
-                byte[] key = Hex.decode(keyHex);
-                byte[] nonce = Hex.decode(nonceHex);
-
-                // Verificar la contraseña desencriptando la contraseña almacenada en el servidor
+                // Verificar la contraseña con la hasheada usando BCrypt
                 if ((info = this.getServer().obtenerClienteInfo(username)) != null) {
-                    String encryptedPassword = info.getContrasena();
-                    String decryptedPassword = ChaChaDecryption.decryptPassword(encryptedPassword, key, nonce);
+                    String hashedPassword = info.getContrasena();
 
-                    if (password.equals(decryptedPassword)) {
+                    if (Bcrypt.verifyPassword(password, hashedPassword)) {
                         info.setOnline(true);
                         client.setInfo(info);
                         this.getServer().actualizarClienteInfo(client);
@@ -120,6 +96,14 @@ public class InicioController extends AbstractVentana {
                         // Cargar la ventana principal
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
                         Scene scene = new Scene(fxmlLoader.load());
+
+                        // CSS
+                        scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+                        scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+                        scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+                        scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+                        scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+                        scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
 
                         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                         stage.setScene(scene);
@@ -190,27 +174,11 @@ public class InicioController extends AbstractVentana {
                 return;
             }
 
-            // Generar clave y nonce
-            SecureRandom secureRandom = new SecureRandom();
-            byte[] key = new byte[32]; // Clave de 256 bits
-            secureRandom.nextBytes(key);
-            byte[] nonce = new byte[8]; // Nonce de 96 bits
-            secureRandom.nextBytes(nonce);
-
-            // Cifrar la contraseña
-            String encryptedPassword = ChaChaEncryption.encryptPassword(password, key, nonce);
-
-            // Guardar la clave y el nonce en un archivo en resources
-            String userDir = "src/main/resources/com/Client/" + username + "-key-nonce.txt";
-            File file = new File(userDir);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write("Key: " + Hex.toHexString(key));
-                writer.newLine();
-                writer.write("Nonce: " + Hex.toHexString(nonce));
-            }
+            // Hashear la contraseña
+            String hashedPassword = Bcrypt.hashPassword(password);
 
             // Crear la información del cliente con la contraseña cifrada
-            ClientInfo info = new ClientInfo(username.trim(), encryptedPassword);
+            ClientInfo info = new ClientInfo(username.trim(), hashedPassword);
 
             // Crear el cliente local después del registro exitoso
             Client client = new Client();
@@ -229,6 +197,14 @@ public class InicioController extends AbstractVentana {
             // Cargar la ventana principal
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
+
+            // CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
 
             PrincipalController controller = fxmlLoader.getController();
             controller.setServer(server);
