@@ -243,17 +243,24 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     public void anadirClienteOnLine(ClientInterface client) throws RemoteException {
         if (client != null) {
             // Añadimos el cliente a lista del servidor
+
             clientesEnLinea.put(client.getNombre(), client);
 
             // Recuperamos sus amigos en linea
+            List<ClientInterface> listaANotificar=new ArrayList<>();;
+
             Map<String, ClientInterface> mapa = this.obtenerAmigosEnLinea(client);
             if (mapa != null) {
                 client.setAmigosOnline(mapa);
-
+                listaANotificar.addAll(mapa.values());
             }
+            client.setOnline(client.getAmigosOnline());
+            actualizarClienteInfo(client);
+            notificar(listaANotificar, "Tu amigo "+client.getNombre()+" se ha conectado");
 
             System.out.println(clientesEnLinea.keySet());
 
+            //Notifico a los amigos de este cliente en linea.
 
         }
     }
@@ -372,6 +379,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         if(cliente != null) {
             clientesEnLinea.remove(cliente.getNombre());
         }
+        //Notifico de la desconexion.
+        notificarAmigos(cliente,"Tu amigo "+cliente.getNombre()+" se ha desconectado.");
     }
 
     @Override

@@ -113,15 +113,15 @@ public class InicioController extends AbstractVentana {
                         client.setPuerto(puerto);
                         client.setPrincipalController(controller);
                         this.setClient(client);
-
-                        String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + " se ha conectado";
+                        this.getServer().actualizarClienteInfo(client);
+                        /*String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + " se ha conectado";
                         System.out.println(con);
 
                         this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), con);
                         for(ClientInterface amigo: this.getClient().getAmigosOnLine().values()){
                             //this.getClient().notificarRecarga(amigo);
-                        }
-                        //this.getClient().setOnline(this.getClient().getAmigosOnLine());
+                        }*/
+
 
                         controller.setClient(client);
                         fxmlLoader.setController(controller);

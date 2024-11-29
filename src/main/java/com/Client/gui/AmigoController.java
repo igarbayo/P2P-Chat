@@ -180,7 +180,7 @@ public class AmigoController extends AbstractVentana {
                             this.getServer().actualizarClienteInfo(this.getClient());
 
                         } else {
-                            System.out.println("No hay chat");
+                            //System.out.println("No hay chat");
                         }
                     }
 

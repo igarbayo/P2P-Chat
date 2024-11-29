@@ -115,7 +115,6 @@ public class PrincipalController extends AbstractVentana {
     // Disposición inicial
     @Override
     public void initialize(URL url, ResourceBundle resources) {
-
         // Mensaje de bienvenida
         //Coge el tiempo actual para imprimirlo en formato texto
         LocalTime tiempoActual = LocalTime.now();
@@ -148,6 +147,11 @@ public class PrincipalController extends AbstractVentana {
                 if (this.getClient().getInfo()!=null && this.getClient().getInfo().getUsuario()!=null) {
                     usernameLabel.setText(this.getClient().getInfo().getUsuario());
                 }
+                try {
+                    this.getClient().setOnline(this.getClient().getAmigosOnline());
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
 
                 //this.mensajePendiente.add(mensaje);
                 printEnConsola();
@@ -167,6 +171,7 @@ public class PrincipalController extends AbstractVentana {
                                         ClientInterface amigo = this.getClient().getInterface(username);
                                         if (this.getServer().obtenerClienteInfo(username) !=null) {
                                             String estado = username + (this.getServer().obtenerClienteInfo(username).isOnline() ? " [Online]" : " [Offline]");
+                                            //String estado = username + (amigo.getOnline() ? " [ONLINE]" : " [OFFLINE]");
                                             amigosObservableList.add(estado);
                                         }
                                     } catch (RemoteException e) {
