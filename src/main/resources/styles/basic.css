@@ -5,10 +5,6 @@
     -fx-font-size: 16;
     -fx-text-fill: -fx--white;
 }
-.TextFlow {
-    -fx--background-color: -fx--black;
-    -fx-text-fill: -fx--white;
-}
 .scroll-pane {
     -fx-background-color: -fx--black;
     -fx-font-size: 16;
@@ -23,7 +19,7 @@
     -fx-background-color: -fx--black;
 }
 .hbox {
-    -fx-fill: -fx--dark-gray;
+    -fx-fill: -fx--white;
     -fx-font-size: 16;
 }
 

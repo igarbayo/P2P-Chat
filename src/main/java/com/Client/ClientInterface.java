@@ -6,12 +6,13 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public interface ClientInterface extends Remote {
 
     void addAmigoOnline(String nombre, ClientInterface client) throws RemoteException;
     void addNotificacion(String notificacion) throws RemoteException;
-    List<String> getNotificaciones() throws RemoteException;
+    CopyOnWriteArrayList<String> getNotificaciones() throws RemoteException;
     void addChat(Chat chat) throws RemoteException;
     ClientInterface getInterface(String username) throws RemoteException;
     void crearChat(ClientInterface clienteDestino) throws RemoteException;

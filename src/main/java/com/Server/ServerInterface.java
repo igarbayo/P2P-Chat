@@ -13,6 +13,9 @@ import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
+    // Borrar esta
+    Map<String, ClientInfo> getListaClientes() throws RemoteException;
+
     void cargarInformacionClientes() throws RemoteException;
     void guardarInformacionClientes() throws RemoteException;
     void anadirSolicitud(String origen, String destino) throws RemoteException;
@@ -32,5 +35,6 @@ public interface ServerInterface extends Remote {
     void notificar(List<ClientInterface> clientes, String mensaje) throws RemoteException;
     void eliminarDeClientesConectados(ClientInterface cliente) throws RemoteException;
     boolean estaLogueado(String usuario) throws RemoteException;
+    void setClientesAOffline() throws RemoteException;
 
 } // end interface

@@ -27,7 +27,13 @@ public class Server {
             // Agregar un hook de cierre para guardar la información al detener la aplicación
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
+                    //Imprimimos lista de clientes
+                    System.out.println("LISTA DE CLIENTES");
+                    System.out.println(exportedObj.getListaClientes());
+                    System.out.println("-------------");
+
                     System.out.println("Guardando la información de los clientes antes de cerrar...");
+                    exportedObj.setClientesAOffline();
                     exportedObj.guardarInformacionClientes();
                 } catch (RemoteException e) {
                     System.err.println("Error al guardar la información de los clientes en el cierre: " + e.getMessage());

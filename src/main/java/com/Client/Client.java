@@ -8,6 +8,8 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 //Serializable
@@ -16,11 +18,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     // Atributos
     private ClientInfo info;
-    private List<Chat> chats;
+    private CopyOnWriteArrayList<Chat> chats;
     private String IP;
     private int puerto;
     private Map<String, ClientInterface> amigosOnLine;
-    private List<String> listaNotificaciones;
+    private CopyOnWriteArrayList<String> listaNotificaciones;
 
     // Getters y setters
     public String getIP() {
@@ -42,10 +44,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public void setInfo(ClientInfo info) {
         this.info = info;
     }
-    protected List<Chat> getChats() {
+    protected CopyOnWriteArrayList<Chat> getChats() {
         return chats;
     }
-    protected void setChats(List<Chat> chats) {
+    protected void setChats(CopyOnWriteArrayList<Chat> chats) {
         this.chats = chats;
     }
     private PrincipalController principalController;
@@ -58,7 +60,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public void setAmigosOnLine(Map<String, ClientInterface> amigosOnLine) {
         this.amigosOnLine = amigosOnLine;
     }
-    public List<String> getListaNotificaciones() {
+    public CopyOnWriteArrayList<String> getListaNotificaciones() {
         return listaNotificaciones;
     }
 
@@ -66,9 +68,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     public Client() throws RemoteException {
         super();
         this.info = null;
-        this.chats = new ArrayList<Chat>();
-        this.amigosOnLine = new HashMap<>();
-        this.listaNotificaciones = new ArrayList<>();
+        this.chats = new CopyOnWriteArrayList<>();
+        this.amigosOnLine = new ConcurrentHashMap<>();
+        this.listaNotificaciones = new CopyOnWriteArrayList<>();
     }
 
     // Métodos
@@ -106,7 +108,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
     @Override
-    public List<String> getNotificaciones() throws RemoteException {
+    public CopyOnWriteArrayList<String> getNotificaciones() throws RemoteException {
         return this.getListaNotificaciones();
     }
 
@@ -213,27 +215,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         }
         clientDestino.recibirMensaje(mensaje);
 
-        /*try {
-            // Buscar el objeto remoto del destinatario en el registro RMI
-            ClientInterface destino = (ClientInterface) Naming.lookup("rmi://localhost/"
-                    + clientDestino.getInfo().getUsuario());
-            Mensaje mensaje = new Mensaje(this.getNombre(), clientDestino.getNombre(), contenido);
-            Optional<Chat> chatDestino = clientDestino.obtenerChat(this.getNombre());
-            // Actualizamos en el destinatario
-            if (chatDestino.isPresent()) {
-                destino.recibirMensaje(mensaje);  // Invocar el método remoto del destinatario
-                // Actualizamos en el origen
-                mensaje = new Mensaje(clientDestino.getNombre(), this.getNombre(), contenido);
-                chatDestino = this.obtenerChat(clientDestino.getNombre());
-                if (chatDestino.isPresent()) {
-                    chatDestino.get().anadirMensaje(mensaje);
-                    this.actualizarChat(chatDestino.get());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
         return true;
     }
 
@@ -262,7 +243,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     @Override
     public void setListaAmigos(List<String> lista) throws RemoteException{
         if (lista!=null) {
-            this.info.setListaAmigos(lista);
+            this.info.setListaAmigos(new CopyOnWriteArrayList<>(lista));
         }
 
     }
@@ -312,7 +293,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         return lista;
 
     }
-
 
     public Optional<Chat> obtenerChat(String clientDestino) {
         if (this.info != null && clientDestino != null &&

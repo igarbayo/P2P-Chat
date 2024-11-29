@@ -44,9 +44,8 @@ public class PrincipalController extends AbstractVentana {
     @FXML
     private Label usernameLabel;
     @FXML
-    private transient TextFlow consola;
-    @FXML
-    private transient ScrollPane scrollPane;
+    private ListView<Text> listView;
+    private ObservableList<Text> lista;
 
 
     private static final ReentrantLock lockSolicitudes = new ReentrantLock(); // Candado
@@ -118,8 +117,14 @@ public class PrincipalController extends AbstractVentana {
     public void initialize(URL url, ResourceBundle resources) {
 
         // Mensaje de bienvenida
-        Text bienvenido = new Text("Bienvenido");
-        consola.getChildren().add(0, bienvenido);
+        //Coge el tiempo actual para imprimirlo en formato texto
+        LocalTime tiempoActual = LocalTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String tiempoFormateado=tiempoActual.format(formato);
+        Text bienvenido = new Text("[" + tiempoFormateado + "] " + "Bienvenido");
+
+        lista = FXCollections.observableArrayList();
+        lista.add(0, bienvenido);
 
         // Crear el scheduler
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -140,8 +145,9 @@ public class PrincipalController extends AbstractVentana {
                 }
 
                 // Mostramos el nombre del usuario conectado
-                usernameLabel.setText(this.getClient().getInfo().getUsuario());
-                scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                if (this.getClient().getInfo()!=null && this.getClient().getInfo().getUsuario()!=null) {
+                    usernameLabel.setText(this.getClient().getInfo().getUsuario());
+                }
 
                 //this.mensajePendiente.add(mensaje);
                 printEnConsola();
@@ -380,7 +386,8 @@ public class PrincipalController extends AbstractVentana {
         for (String notificacion : notificacionesCopia) {
 
             System.out.println(notificacion);
-            Text text = new Text("[" + tiempoFormateado + "] " + notificacion + "\n");
+            Text text = new Text("[" + tiempoFormateado + "] " + notificacion);
+            text.setStyle("-fx-fill: -fx--white;");
 
             try {
                 // Eliminar la notificación de la lista original
@@ -390,14 +397,20 @@ public class PrincipalController extends AbstractVentana {
             }
 
             // Añadir el texto a la consola
-            consola.getChildren().add(0, text);
+            lista.add(0,text);
             System.out.println(text);
             //consola.requestLayout();
 
             // Limitar el tamaño de la consola
-            if (consola.getChildren().size() > MAX_MESSAGES) {
-                consola.getChildren().remove(MAX_MESSAGES);
+            if (lista.size() > MAX_MESSAGES) {
+                lista.remove(MAX_MESSAGES);
             }
+        }
+
+        if (!lista.isEmpty()) {
+            listView.setItems(lista);
+        } else {
+            listView.setItems(FXCollections.observableArrayList(new ArrayList<>()));
         }
 
 

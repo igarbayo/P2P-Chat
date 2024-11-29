@@ -1,5 +1,7 @@
 package com.Client.gui;
 
+import com.Client.Client;
+import com.Client.ClientInfo;
 import com.Client.ClientInterface;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ResourceBundle;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class LogoutController extends AbstractVentana {
 
@@ -24,6 +27,7 @@ public class LogoutController extends AbstractVentana {
     private Button botonNo;
     @FXML
     private Label usernameLabel;
+    private static final ReentrantLock lock = new ReentrantLock();
 
     // Para cambiar la ventana anterior
     private Stage oldStage;
@@ -90,30 +94,33 @@ public class LogoutController extends AbstractVentana {
             controller.setPuerto(this.getClient().getPuerto());
 
             if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
-                // Ponemos vacia la ClientInfo de la instancia de Client actual
-                this.getClient().getInfo().setOnline(false);
-                this.getServer().actualizarClienteInfo(this.getClient());
+                // Ponemos offline la ClientInfo de la instancia de Client actual
+                lock. lock();
+                try {
+                    ClientInfo info = this.getClient().getInfo();
+                    info.setOnline(false);
+                    this.getClient().setInfo(info);
+                    this.getServer().actualizarClienteInfo(this.getClient());
 
-                if (this.getClient().getAmigosOnLine()!=null) {
-                    String desc = "Amigo " + this.getClient().getInfo().getUsuario() + " desconectado";
-                    System.out.println(desc);
-                    this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), desc);
-                    this.getClient().setOffline(this.getClient().getAmigosOnLine());
-                    for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
+                    if (this.getClient().getAmigosOnLine()!=null) {
+                        String desc = "Amigo " + this.getClient().getInfo().getUsuario() + " desconectado";
+                        System.out.println(desc);
+                        this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), desc);
+                        //this.getClient().setOffline(this.getClient().getAmigosOnLine());
+                        for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
+                            this.getServer().actualizarClienteInfo(amigo);
+                            System.out.println(amigo.getNotificaciones());
+                        }
 
-                        this.getServer().actualizarClienteInfo(amigo);
-                        //this.getClient().notificarRecarga(amigo);
-                        System.out.println(amigo.getNotificaciones());
+                    } else {
+                        System.out.println("Amigos nulos");
                     }
 
-                } else {
-                    System.out.println("Amigos nulos");
+                    this.getClient().cerrarConexion();
+                } finally {
+                    lock.unlock();
                 }
-
-                this.getClient().cerrarConexion();
             }
-
-            //this.getClient().setInfo(null);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

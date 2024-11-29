@@ -4,25 +4,25 @@ import com.Client.*;
 import com.Client.security.ChaChaDecryption;
 import com.Client.security.ChaChaEncryption;
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -51,9 +51,7 @@ public class AmigoController extends AbstractVentana {
     }
 
     @FXML
-    private transient VBox vbox;
-    @FXML
-    private transient ScrollPane scrollPane;
+    private ListView<HBox> listView;
     @FXML
     private Label usernameAmigo;
     @FXML
@@ -71,21 +69,20 @@ public class AmigoController extends AbstractVentana {
 
 
     // Método para agregar texto al TextFlow
-    public void agregarTexto(Mensaje mensaje) {
-        Label text = new Label(mensaje.toString());
-        text.setStyle("-fx-text-fill: black;");
-        //Label aux = new Label("\n");
-        HBox hbox = new HBox(text);
+    public void agregarTexto(Mensaje mensaje, ObservableList<HBox> lista) {
         // El mensaje lo manda uno mismo (derecha)
         if (mensaje.getClienteOrigen().equals(this.getClient().getInfo().getUsuario())) {
+            Label label = new Label(mensaje.StringDerecha());
+            HBox hbox = new HBox(label);
             hbox.setAlignment(Pos.CENTER_RIGHT); // Asegúrate de que los elementos se alineen a la derecha
-            vbox.getChildren().add(hbox); // Agrega el HBox al TextFlow
+            lista.add(hbox);
         } // el mensaje lo manda la otra persona (izquierda)
         else {
+            Label label = new Label(mensaje.StringIzquierda());
+            HBox hbox = new HBox(label);
             hbox.setAlignment(Pos.CENTER_LEFT); // Asegúrate de que los elementos se alineen a la derecha
-            vbox.getChildren().add(hbox); // Agrega el HBox al TextFlow
+            lista.add(hbox);
         }
-
 
         // Desplazar siempre hacia abajo al agregar un nuevo texto
         desplazarHaciaAbajo();
@@ -94,18 +91,18 @@ public class AmigoController extends AbstractVentana {
     // Método para desplazar el ScrollPane hacia la parte inferior
     private void desplazarHaciaAbajo() {
         // Esto asegura que el ScrollPane se desplaza a la parte inferior
-        scrollPane.setVvalue(1.0);  // Establece el valor vertical al máximo (parte inferior)
+        listView.scrollTo(listView.getItems().size() - 1);
     }
 
     // Método para vaciar el contendedor de chat
-    public void vaciarTextFlow() {
-        vbox.getChildren().clear(); // Elimina todos los nodos dentro del TextFlow
+    public void vaciarLista() {
+        //listView.getItems().clear(); // Elimina todos los nodos dentro del TextFlow
     }
 
     // Método para recuperar el chat
     public void recuperarChat(Chat chat, String user1, String user2) throws Exception {
-        vaciarTextFlow();
-        vbox.setAlignment(Pos.BOTTOM_CENTER); // Cambia CENTER según tu necesidad
+        vaciarLista();
+        ObservableList<HBox> listaChat = FXCollections.observableArrayList();
         if (chat!= null) {
             for (Mensaje mensaje : chat.getMensajes()) {
                 // Desencriptamos el mensaje
@@ -113,8 +110,11 @@ public class AmigoController extends AbstractVentana {
                 String decryptedContenido = ChaChaDecryption.decryptMessage(mensaje.getContenido(), keyNonce.getKey(), keyNonce.getNonce());
                 Mensaje mensajeDecriptado = new Mensaje(mensaje.getClienteOrigen(), mensaje.getClienteDestino(), decryptedContenido, mensaje.getTiempoFormateado());
 
-                agregarTexto(mensajeDecriptado);
+                agregarTexto(mensajeDecriptado, listaChat);
             }
+            listView.setItems(listaChat);
+        } else {
+            listView.setItems(FXCollections.observableArrayList(new ArrayList<>()));
         }
     }
 
@@ -133,8 +133,8 @@ public class AmigoController extends AbstractVentana {
 
                 // Mostramos el nombre del usuario conectado
                 try {
-                    if (amigo.getNombre()!=null && amigo!=null) {
-                        usernameAmigo.setText(amigo.getNombre());
+                    if (amigo.getClientInfo().getUsuario()!=null && amigo!=null) {
+                        usernameAmigo.setText(amigo.getClientInfo().getUsuario());
                         // Mostramos el nombre del usuario conectado
                         usernameLabel.setText(this.getClient().getInfo().getUsuario());
                     }
@@ -144,8 +144,8 @@ public class AmigoController extends AbstractVentana {
 
                 try {
                     //Debug
-                    System.out.println(amigo);
-                    System.out.println(this.getServer().obtenerClienteInfo(amigo.getNombre()));
+                    //System.out.println(amigo);
+                    //System.out.println(this.getServer().obtenerClienteInfo(amigo.getNombre()));
 
                     if (this.getServer().obtenerClienteInfo(amigo.getNombre()) != null) {
                         errorText.setVisible(!this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline());

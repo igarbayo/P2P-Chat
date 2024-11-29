@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClientInfo implements Serializable {
 
@@ -12,7 +13,7 @@ public class ClientInfo implements Serializable {
     // Atributos
     private String usuario;
     private String contrasena;
-    private List<String> listaAmigos;
+    private CopyOnWriteArrayList<String> listaAmigos;
     private boolean online;
 
     // Getters y Setters
@@ -28,10 +29,10 @@ public class ClientInfo implements Serializable {
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }
-    public List<String> getListaAmigos() {
+    public CopyOnWriteArrayList<String> getListaAmigos() {
         return listaAmigos;
     }
-    public void setListaAmigos(List<String> listaAmigos) {
+    public void setListaAmigos(CopyOnWriteArrayList<String> listaAmigos) {
         this.listaAmigos = listaAmigos;
     }
     public boolean isOnline() {
@@ -45,10 +46,10 @@ public class ClientInfo implements Serializable {
     public ClientInfo(String usuario, String contrasena) {
         this.usuario = usuario;
         this.contrasena = contrasena;
-        this.listaAmigos = new ArrayList<>();
+        this.listaAmigos = new CopyOnWriteArrayList<>();
         this.online = false;
     }
-    public ClientInfo(String usuario, String contrasena, List<String> listaAmigos, boolean online) {
+    public ClientInfo(String usuario, String contrasena, CopyOnWriteArrayList<String> listaAmigos, boolean online) {
         this.usuario = usuario;
         this.contrasena = contrasena;
         this.listaAmigos = listaAmigos;

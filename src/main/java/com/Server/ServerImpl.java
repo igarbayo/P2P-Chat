@@ -8,6 +8,8 @@ import java.io.*;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -19,7 +21,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     private int puerto;
     private Map<String, ClientInterface> clientesEnLinea;
     private Map<String, ClientInfo> listaClientes;
-    List<Map.Entry<String, String>> listaSolicitudes;
+    private CopyOnWriteArrayList<Map.Entry<String, String>> listaSolicitudes;
 
     // Getters y setters
     public String getIP() {
@@ -38,9 +40,15 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     // Constructor
     public ServerImpl() throws RemoteException {
         super();
-        this.listaClientes = new HashMap<>();
-        this.clientesEnLinea = new HashMap<>();
-        this.listaSolicitudes=new ArrayList<>();
+        this.listaClientes = new ConcurrentHashMap<>();
+        this.clientesEnLinea = new ConcurrentHashMap<>();
+        this.listaSolicitudes = new CopyOnWriteArrayList<>();
+    }
+
+
+    @Override
+    public Map<String, ClientInfo> getListaClientes() throws RemoteException {
+        return listaClientes;
     }
 
     @Override
@@ -98,7 +106,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             }
 
             // Crear y devolver un nuevo objeto ClientInfo
-            return new ClientInfo(usuario, contrasena, listaAmigos, online);
+            return new ClientInfo(usuario, contrasena, new CopyOnWriteArrayList<>(listaAmigos), online);
         } catch (StringIndexOutOfBoundsException e) {
             System.err.println("Error al analizar ClientInfo: " + data);
             e.printStackTrace();
@@ -382,25 +390,17 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         return this.clientesEnLinea.containsKey(usuario);
     }
 
-
-
-
-    /*@Override
-    public void desconectarCliente(String username) throws RemoteException {
-        // Eliminar cliente de la lista de clientes en línea y notificar a los demás
-        clientesEnLinea.removeIf(cliente -> {
-            try {
-                return cliente.equals(username);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                return false;
+    @Override
+    public void setClientesAOffline() throws RemoteException {
+        if (this.listaClientes != null) {
+            for (ClientInfo info : listaClientes.values()) {
+                info.setOnline(false);
             }
-        });
-        // Notificar desconexión a los demás clientes
-        for (ClienteChat cliente : clientesEnLinea) {
-            cliente.notificarDesconexion(username);
         }
-    }*/
+        if (this.clientesEnLinea != null) {
+            clientesEnLinea.clear();
+        }
+    }
 
 
 

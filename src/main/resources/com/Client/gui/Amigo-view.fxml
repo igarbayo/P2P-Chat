@@ -18,16 +18,12 @@
 
        <Label layoutX="159.0" layoutY="32.0" text="Amigo:" />
       <Label fx:id="usernameAmigo" layoutX="172.0" layoutY="74.0" text="username" />
-      <Button fx:id="botonDejar" layoutX="750.0" layoutY="28.0" mnemonicParsing="false" onAction="#onbotonDejar" text="Dejar amistad" textAlignment="RIGHT" />
+      <Button fx:id="botonDejar" layoutX="737.0" layoutY="28.0" mnemonicParsing="false" onAction="#onbotonDejar" text="Dejar amistad" textAlignment="RIGHT" />
       <TextArea fx:id="textoAEnviar" layoutX="150.0" layoutY="422.0" prefHeight="60.0" prefWidth="614.0" promptText="Escriba el mensaje" />
       <Button fx:id="botonEnviar" layoutX="774.0" layoutY="422.0" mnemonicParsing="false" onAction="#onEnviar" prefHeight="60.0" prefWidth="86.0" text="Enviar" />
-      <Button fx:id="botonVolver" layoutX="775.0" layoutY="70.0" mnemonicParsing="false" onAction="#onVolver" text="Volver" />
+      <Button fx:id="botonVolver" layoutX="787.0" layoutY="70.0" mnemonicParsing="false" onAction="#onVolver" text="Volver" />
        <Text fx:id="errorText" fill="#ea3535" layoutX="301.0" layoutY="87.0" strokeType="OUTSIDE" strokeWidth="0.0" text="no está en línea" wrappingWidth="182.95899963378906" />
-      <ScrollPane fx:id="scrollPane" layoutX="150.0" layoutY="113.0" prefHeight="291.0" prefWidth="709.0">
-          <content>
-              <VBox fx:id="vbox" prefHeight="292.0" prefWidth="686.0" />
-          </content>
-      </ScrollPane>
+       <ListView fx:id="listView" layoutX="150.0" layoutY="113.0" prefHeight="292.0" prefWidth="710.0" />
        <Line endX="-114.0" endY="471.0" layoutX="233.0" layoutY="29.0" startX="-114.0" startY="-29.0" stroke="#222831" />
    </children>
 </AnchorPane>

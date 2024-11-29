@@ -96,4 +96,12 @@ public class Mensaje implements Serializable {
     public String toString() {
         return "[" + tiempoFormateado + "]" + " [de " + clienteOrigen + "] " + contenido;
     }
+
+    public String StringIzquierda() {
+        return "[" + tiempoFormateado + "] " + contenido;
+    }
+
+    public String StringDerecha() {
+        return contenido + " [" + tiempoFormateado + "]";
+    }
 }

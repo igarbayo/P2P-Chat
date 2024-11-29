@@ -80,6 +80,7 @@ public class InicioController extends AbstractVentana {
                     String hashedPassword = info.getContrasena();
 
                     if (Bcrypt.verifyPassword(password, hashedPassword)) {
+                        System.out.println("La contraseña es correcta");
                         info.setOnline(true);
                         client.setInfo(info);
                         this.getServer().actualizarClienteInfo(client);
@@ -105,10 +106,6 @@ public class InicioController extends AbstractVentana {
                         scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
                         scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
 
-                        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                        stage.setScene(scene);
-                        stage.show();
-
                         // Pasa la instancia del servidor y del cliente
                         PrincipalController controller = fxmlLoader.getController();
                         controller.setServer(this.getServer());
@@ -124,10 +121,14 @@ public class InicioController extends AbstractVentana {
                         for(ClientInterface amigo: this.getClient().getAmigosOnLine().values()){
                             //this.getClient().notificarRecarga(amigo);
                         }
-                        this.getClient().setOnline(this.getClient().getAmigosOnLine());
+                        //this.getClient().setOnline(this.getClient().getAmigosOnLine());
 
                         controller.setClient(client);
                         fxmlLoader.setController(controller);
+
+                        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                        stage.setScene(scene);
+                        stage.show();
 
                         // Debug
                         System.out.println(this.getClient().getInfo().getListaAmigos());
