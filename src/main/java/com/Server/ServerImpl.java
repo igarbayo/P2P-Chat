@@ -257,9 +257,15 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             client.setOnline(client.getAmigosOnline());
             actualizarClienteInfo(client);
             notificar(listaANotificar, "Tu amigo "+client.getNombre()+" se ha conectado");
-
+            this.actualizarClienteEnLinea(client,1);
             System.out.println(clientesEnLinea.keySet());
-
+            if (this.listaClientes != null) {
+                for (ClientInfo info : listaClientes.values()) {
+                    if(client.getClientInfo().getUsuario().equals(info.getUsuario())) {
+                        info.setOnline(true);
+                    }
+                }
+            }
             //Notifico a los amigos de este cliente en linea.
 
         }
@@ -380,6 +386,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             clientesEnLinea.remove(cliente.getNombre());
         }
         //Notifico de la desconexion.
+        this.actualizarClienteEnLinea(cliente,2);
         notificarAmigos(cliente,"Tu amigo "+cliente.getNombre()+" se ha desconectado.");
     }
 
@@ -411,6 +418,23 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
+    public void actualizarClienteEnLinea(ClientInterface cliente, int online) throws RemoteException {
+        if(cliente.getClientInfo().getUsuario()!=null && online!=0) {
+            if(online==1){
+                ClientInfo infoActualizada = listaClientes.get(cliente.getClientInfo().getUsuario());
+                infoActualizada.setOnline(true);
+                listaClientes.remove(cliente.getClientInfo().getUsuario());
+                listaClientes.put(cliente.getClientInfo().getUsuario(), infoActualizada);
+            }
+            if (online==2){
+                ClientInfo infoActualizada = listaClientes.get(cliente.getClientInfo().getUsuario());
+                infoActualizada.setOnline(false);
+                listaClientes.remove(cliente.getClientInfo().getUsuario());
+                listaClientes.put(cliente.getClientInfo().getUsuario(), infoActualizada);
+            }
+        }
+    }
 
 
 } // end class

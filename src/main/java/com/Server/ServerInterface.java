@@ -36,5 +36,5 @@ public interface ServerInterface extends Remote {
     void eliminarDeClientesConectados(ClientInterface cliente) throws RemoteException;
     boolean estaLogueado(String usuario) throws RemoteException;
     void setClientesAOffline() throws RemoteException;
-
+    void actualizarClienteEnLinea(ClientInterface cliente, int Online) throws RemoteException;
 } // end interface

@@ -103,7 +103,7 @@ public class LogoutController extends AbstractVentana {
                     this.getServer().actualizarClienteInfo(this.getClient());
 
                     if (this.getClient().getAmigosOnLine()!=null) {
-                        this.getClient().setOffline(this.getClient().getAmigosOnLine());
+                        //this.getClient().setOffline(this.getClient().getAmigosOnLine());
                         for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
                             this.getServer().actualizarClienteInfo(amigo);
                             System.out.println(amigo.getNotificaciones());
@@ -112,6 +112,36 @@ public class LogoutController extends AbstractVentana {
                     } else {
                         System.out.println("Amigos nulos");
                     }
+
+                    System.out.println("===========================\n" +
+                            "Información de amigos y del propio cliente:\n" +
+                            "=======================================\n" +
+                            "Usuario de this.client() "+this.getClient().getInfo().getUsuario()+"\n" +
+                            "Estado online: +"+(this.getClient().getOnline()?"[Online]" : " [Offline]") +"\n"+
+                            "Estado online con getClientInfo: "+(this.getClient().getClientInfo().isOnline()?"[Online]" : " [Offline]") + "\n" +
+                            "Amigos: \n" +
+                            "------------------------------------------\n");
+                    for(ClientInterface amigo1 : this.getClient().getAmigosOnLine().values()){
+                        System.out.println(amigo1.getClientInfo().getUsuario());
+                        //ClientInterface amigo3=this.getServer().getInterface(amigo1.getClientInfo().getUsuario());
+                        for(ClientInterface amigo2 : amigo1.getAmigosOnline().values()){
+                            System.out.println(amigo1.getClientInfo().getUsuario());
+                            System.out.println(amigo2.getClientInfo().getUsuario());
+                            System.out.println((amigo2.getClientInfo().isOnline()?"[Online]" : " [Offline]")+"\n" +
+                                    "Ahora con getInerface: \n" +
+                                    (this.getServer().obtenerClienteInfo(amigo2.getClientInfo().getUsuario()).isOnline()?"[Online]" : " [Offline]"));
+                            System.out.println(amigo2.getOnline()?"[Online]" : " [Offline]");
+                            System.out.println("información del amigo: \n");
+                            System.out.println(amigo1.getClientInfo().getUsuario());
+                            System.out.println((amigo1.getClientInfo().isOnline()?"[Online]" : " [Offline]")+"\n" +
+                                    "Ahora con getInerface: \n" +
+                                    (this.getServer().obtenerClienteInfo(amigo1.getClientInfo().getUsuario()).isOnline()?"[Online]" : " [Offline]"));
+                            System.out.println(amigo1.getOnline()?"[Online]" : " [Offline]");
+
+
+                        }
+                    }
+
                     this.getServer().eliminarDeClientesConectados(this.getClient());
                     this.getClient().cerrarConexion();
 

@@ -147,11 +147,6 @@ public class PrincipalController extends AbstractVentana {
                 if (this.getClient().getInfo()!=null && this.getClient().getInfo().getUsuario()!=null) {
                     usernameLabel.setText(this.getClient().getInfo().getUsuario());
                 }
-                try {
-                    this.getClient().setOnline(this.getClient().getAmigosOnline());
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
 
                 //this.mensajePendiente.add(mensaje);
                 printEnConsola();
