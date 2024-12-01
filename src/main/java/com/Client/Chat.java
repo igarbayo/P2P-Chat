@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client;
 
 import java.io.Serializable;

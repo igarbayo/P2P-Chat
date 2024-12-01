@@ -1,6 +1,12 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.gui;
 
 import com.Client.Client;
+import com.Client.ClientInfo;
+import com.Client.ClientInterface;
 import com.Server.ServerInterface;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -52,31 +58,6 @@ public abstract class AbstractVentana implements Initializable {
         return puerto;
     }
 
-
-    public void recargar(Stage stage, String string) {
-        Platform.runLater(() -> {
-            // Cargar el archivo FXML
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(string));
-            Scene scene = null;
-            try {
-                scene = new Scene(fxmlLoader.load());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            // Carga el stage
-            stage.setScene(scene);
-            stage.show();
-
-            // Pasa la instancia del servidor
-            PrincipalController controller = fxmlLoader.getController();
-            controller.setServer(this.getServer());
-            this.setClient(client);
-            controller.setClient(client);
-            fxmlLoader.setController(controller);
-        });
-    }
-
     public void safeHandleWindowClose() {
         if (isClosing) return; // Evitar múltiples ejecuciones
         isClosing = true;
@@ -86,7 +67,7 @@ public abstract class AbstractVentana implements Initializable {
         } catch (RemoteException e) {
             e.printStackTrace(); // Manejo de errores
         } finally {
-            Platform.exit(); // Cierra JavaFX de manera segura
+            //Platform.exit(); // Cierra JavaFX de manera segura
             System.exit(0);  // Termina el programa
         }
     }
@@ -94,9 +75,17 @@ public abstract class AbstractVentana implements Initializable {
     public void handleWindowClose() throws RemoteException {
         // Cuando la ventana se cierra, se establece setOnline a false
         if (this.getClient() != null && this.getClient().getInfo() != null) {
-            this.getClient().getInfo().setOnline(false);  // Establece el estado de "online" a false
+            ClientInfo info = this.getClient().getInfo();
+            info.setOnline(false);
+            this.getClient().setInfo(info);
             this.getServer().actualizarClienteInfo(this.getClient());
-            //this.getClient().cerrarConexion();
+            if (this.getClient().getAmigosOnLine()!=null) {
+                for(ClientInterface amigo : this.getClient().getAmigosOnLine().values()){
+                    this.getServer().actualizarClienteInfo(amigo);
+                }
+            }
+            this.getServer().eliminarDeClientesConectados(this.getClient());
+            this.getClient().cerrarConexion();
         }
     }
 

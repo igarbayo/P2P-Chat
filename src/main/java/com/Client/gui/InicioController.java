@@ -1,9 +1,11 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.gui;
 
 import com.Client.*;
 import com.Client.security.Bcrypt;
-import com.Client.security.ChaChaDecryption;
-import com.Client.security.ChaChaEncryption;
 import com.Server.ServerInterface;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,11 +17,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.bouncycastle.util.encoders.Hex;
-
 import java.io.*;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.util.ResourceBundle;
 
 public class InicioController extends AbstractVentana {
@@ -57,7 +56,6 @@ public class InicioController extends AbstractVentana {
     private TextField passwordTextField;
 
     // Métodos de acciones
-
     @FXML
     public void onBotonLogin(ActionEvent event) {
         String username = usernameTextField.getText();
@@ -80,7 +78,6 @@ public class InicioController extends AbstractVentana {
                     String hashedPassword = info.getContrasena();
 
                     if (Bcrypt.verifyPassword(password, hashedPassword)) {
-                        System.out.println("La contraseña es correcta");
                         info.setOnline(true);
                         client.setInfo(info);
                         this.getServer().actualizarClienteInfo(client);
@@ -88,11 +85,6 @@ public class InicioController extends AbstractVentana {
                         // Registro RMI
                         client.registrarCliente(IP, puerto);
                         this.getServer().anadirClienteOnLine(client);
-
-                        if (client.getAmigosOnLine() != null) {
-                            System.out.println("Amigos en línea: " + client.getAmigosOnLine().keySet());
-                        }
-                        System.out.println("Amigos (todos): " + client.getInfo().getListaAmigos());
 
                         // Cargar la ventana principal
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("PrincipalCliente-view.fxml"));
@@ -114,14 +106,6 @@ public class InicioController extends AbstractVentana {
                         client.setPrincipalController(controller);
                         this.setClient(client);
                         this.getServer().actualizarClienteInfo(client);
-                        /*String con = "Tu amigo " + this.getClient().getInfo().getUsuario() + " se ha conectado";
-                        System.out.println(con);
-
-                        this.getClient().notificarClientes(this.getClient().getAmigosOnLine(), con);
-                        for(ClientInterface amigo: this.getClient().getAmigosOnLine().values()){
-                            //this.getClient().notificarRecarga(amigo);
-                        }*/
-
 
                         controller.setClient(client);
                         fxmlLoader.setController(controller);
@@ -130,8 +114,6 @@ public class InicioController extends AbstractVentana {
                         stage.setScene(scene);
                         stage.show();
 
-                        // Debug
-                        System.out.println(this.getClient().getInfo().getListaAmigos());
                     } else {
                         mostrarError("Usuario o contraseña incorrectos");
                     }

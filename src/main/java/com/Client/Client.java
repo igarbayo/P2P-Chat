@@ -1,9 +1,17 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client;
 
 import com.Client.gui.PrincipalController;
-import com.Server.Server;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -15,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 //Serializable
 public class Client extends UnicastRemoteObject implements ClientInterface, Serializable {
     private static final long serialVersionUID = 1L;
+    private static final String BASE_PATH = "src/main/resources/com/Client/";
 
     // Atributos
     private ClientInfo info;
@@ -112,28 +121,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         return this.getListaNotificaciones();
     }
 
-    public void notificarRecarga(ClientInterface clienteObjetivo) {
-        try {
-            clienteObjetivo.recargarVentana();
-            System.out.println("1. Se ha solicitado la recarga de la ventana del cliente.");
-        } catch (RemoteException e) {
-            System.err.println("1. Error al notificar la recarga: " + e.getMessage());
-        }
-    }
-    @Override
-    public void recargarVentana() throws RemoteException {
-        // Asegúrate de que la lógica gráfica se ejecute en el hilo de JavaFX
-        //Platform.runLater(() -> {
-            if (principalController != null) {
-                System.out.println("2. Se llama a recargar vista");
-                this.principalController.recargarVista(); // Llama al método de tu controlador
-                System.out.println(this.getInfo().getListaAmigos());
-            } else {
-                System.out.println("2. No hay controlador disponible para recargar.");
-            }
-        //});
-    }
-
     public void registrarCliente(String ip, int puerto) throws RemoteException {
         try {
             // Registrar el objeto remoto en el registro RMI con el nombre de usuario
@@ -154,9 +141,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
     public void cerrarConexion() throws RemoteException {
         try {
-            System.out.println(this.IP);
-            System.out.println(this.puerto);
-            System.out.println(this.info);
             // Desregistrar el objeto remoto en el registro RMI con el nombre de usuario
             if (this.IP != null && this.info!=null && this.info.getUsuario()!=null) {
                 String URL = "rmi://" + this.IP + ":" + this.puerto + "/" + this.info.getUsuario();
@@ -173,30 +157,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
     @Override
-    public void notificarClientes(Map<String, ClientInterface> mapa, String mensaje) throws RemoteException {
-
-            if (mapa!=null && mensaje!=null) {
-                for (ClientInterface cliente : mapa.values()) {
-                    try {
-                        cliente.addNotificacion(mensaje);
-                    } catch (RemoteException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-
-
-    }
-
-    @Override
     public void recibirMensaje(Mensaje mensaje) throws RemoteException {
         Optional<Chat> chat = this.obtenerChat(mensaje.getClienteOrigen());
         if (chat.isPresent()) {
-            System.out.println("Se añade el chat");
             chat.get().anadirMensaje(mensaje);
             actualizarChat(chat.get());
         } else {
-            System.out.println("Se crea el chat");
             crearChat(this.getInterface(mensaje.getClienteOrigen()));
             recibirMensaje(mensaje);
         }
@@ -257,16 +223,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
 
             // 2. Añadir usuario(clienteSolicitante) a this.listaAmigos
             this.getInfo().getListaAmigos().add(clienteSolicitante.getUsuario());
-
-            // 3. Borrar la solicitud de la lista de 'this' (controller)
-
-            // (Opcional) Confirmación
-
-
-            System.out.println("Solicitud de amistad aceptada: ");
-        } else {
-            // Si los objetos son nulos, manejar el error
-            System.out.println("Error: Cliente o información no válida.");
         }
     }
 
@@ -276,22 +232,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
             amigo.getListaAmigos().remove(this.getInfo().getUsuario());
             //Elimino el amigo del usuario
             this.getInfo().getListaAmigos().remove(amigo.getUsuario());
-            System.out.println("Amigo eliminado: " + amigo.getUsuario());
-        }else{
-            System.out.println("Error: Cliente o información no válida.");
         }
-    }
-
-    @Override
-    public List<String> obtenerNombresDeUsuario(List<ClientInterface> listaClientInterface) throws RemoteException{
-        List<String> lista = new ArrayList<>();
-        for (ClientInterface client : listaClientInterface) {
-            if (client.getNombre()!=null) {
-                lista.add(client.getNombre());
-            }
-        }
-        return lista;
-
     }
 
     public Optional<Chat> obtenerChat(String clientDestino) {
@@ -346,12 +287,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
                 // Añadir el usuario a la lista de amigos si no está ya
                 if (!this.info.getListaAmigos().contains(username)) {
                     this.info.getListaAmigos().add(username);
-
-                    //Platform.runLater(() -> principalController.printEnConsola("Amistad confirmada con: " + username));
-                    //System.out.println("Amistad confirmada con: " + username);
                 }
             } catch (Exception e) {
-                System.err.println("Error al confirmar amistad con " + username);
                 e.printStackTrace();
             }
         }
@@ -367,22 +304,41 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
     }
 
     @Override
-    public void setOffline(Map<String, ClientInterface> mapa) throws RemoteException {
-        if (mapa!=null) {
+    public void setOnline(Map<String, ClientInterface> mapa) throws RemoteException {
+        if (mapa!=null && !mapa.isEmpty()) {
             for (ClientInterface cliente : mapa.values()) {
                 ClientInterface origen = cliente.getAmigosOnline().get(this.getInfo().getUsuario());
-                origen.getClientInfo().setOnline(false);
+                if (origen !=null && origen.getClientInfo() != null) {
+                    origen.getClientInfo().setOnline(true);
+                }
             }
         }
     }
 
     @Override
-    public void setOnline(Map<String, ClientInterface> mapa) throws RemoteException {
+    public void addAmigoOnline(ClientInterface client) throws RemoteException {
+        Map<String, ClientInterface> mapa = this.getAmigosOnLine();
         if (mapa!=null) {
-            for (ClientInterface cliente : mapa.values()) {
-                ClientInterface origen = cliente.getAmigosOnline().get(this.getInfo().getUsuario());
-                origen.getClientInfo().setOnline(true);
-            }
+            mapa.put(client.getClientInfo().getUsuario(), client);
+            this.setAmigosOnLine(mapa);
+        } else {
+            mapa = new HashMap<>();
+            mapa.put(client.getClientInfo().getUsuario(), client);
+            this.setAmigosOnLine(mapa);
+        }
+    }
+
+    @Override
+    public void saveForUser(String username, byte[] key, byte[] nonce) throws RemoteException, IOException {
+        // Crear carpeta del usuario si no existe
+        String userPath = BASE_PATH + this.info.getUsuario();
+        Files.createDirectories(Paths.get(userPath));
+
+        // Crear el archivo
+        File file = new File(userPath + "/" + username + ".key");
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write("Key: " + Base64.getEncoder().encodeToString(key) + "\n");
+            writer.write("Nonce: " + Base64.getEncoder().encodeToString(nonce) + "\n");
         }
     }
 

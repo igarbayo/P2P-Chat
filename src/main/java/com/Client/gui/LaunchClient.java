@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.gui;
 
 import javafx.application.Application;
@@ -7,7 +11,6 @@ import javafx.stage.Stage;
 
 public class LaunchClient extends Application {
     ConexionController conexionControlador;
-    InicioController inicioControlador;
 
     @Override
     public void start(Stage primaryStage) throws Exception {

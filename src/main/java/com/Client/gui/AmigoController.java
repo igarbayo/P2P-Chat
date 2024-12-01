@@ -1,27 +1,27 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+//
+
 package com.Client.gui;
 
 import com.Client.*;
 import com.Client.security.ChaChaDecryption;
 import com.Client.security.ChaChaEncryption;
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-
 import java.net.URL;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,13 +41,13 @@ public class AmigoController extends AbstractVentana {
         this.stagePrincipal = stagePrincipal;
     }
 
-    // Atributo añadido para Amigo
-    private ClientInterface amigo;
-    public ClientInterface getAmigo() {
-        return amigo;
+    // Atributo añadido para gestionar el amigo
+    private String usernameOfAmigo;
+    public String getUsernameOfAmigo() {
+        return usernameOfAmigo;
     }
-    public void setAmigo(ClientInterface amigo) {
-        this.amigo = amigo;
+    public void setUsernameAmigo(String usernameOfAmigo) {
+        this.usernameOfAmigo = usernameOfAmigo;
     }
 
     @FXML
@@ -132,55 +132,50 @@ public class AmigoController extends AbstractVentana {
                 errorText.setVisible(false);
 
                 // Mostramos el nombre del usuario conectado
-                try {
-                    if (amigo.getClientInfo().getUsuario()!=null && amigo!=null) {
-                        usernameAmigo.setText(amigo.getClientInfo().getUsuario());
-                        // Mostramos el nombre del usuario conectado
-                        usernameLabel.setText(this.getClient().getInfo().getUsuario());
-                    }
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
+                if (usernameOfAmigo != null) {
+                    usernameAmigo.setText(usernameOfAmigo);
+                    // Mostramos el nombre del usuario conectado
+                    usernameLabel.setText(this.getClient().getInfo().getUsuario());
                 }
 
                 try {
-                    //Debug
-                    //System.out.println(amigo);
-                    //System.out.println(this.getServer().obtenerClienteInfo(amigo.getNombre()));
-
-                    if (this.getServer().obtenerClienteInfo(amigo.getNombre()) != null) {
-                        errorText.setVisible(!this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline());
-                        botonEnviar.setDisable(!this.getServer().obtenerClienteInfo(amigo.getNombre()).isOnline());
+                    if (this.getServer().obtenerClienteInfo(usernameOfAmigo) != null) {
+                        errorText.setVisible(!this.getServer().obtenerClienteInfo(usernameOfAmigo).isOnline());
+                        botonEnviar.setDisable(!this.getServer().obtenerClienteInfo(usernameOfAmigo).isOnline());
                     }
 
                     //Creamos/obtenemos el chat si está logueado
                     if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
-                        if (this.getClient().obtenerChat(amigo.getNombre()).isEmpty()) {
-                            this.getClient().crearChat(amigo);
+                        if (this.getClient().obtenerChat(usernameOfAmigo).isEmpty()) {
+                            if (this.getServer().obtenerClienteInfo(usernameOfAmigo).isOnline()) {
+                                ClientInterface amigoInterface = this.getServer().getInterface(usernameOfAmigo);
+                                if (amigoInterface != null) {
+                                    this.getClient().crearChat(amigoInterface);
+                                    // Generamos las claves de cifrado
+                                    String user1 = this.getClient().getNombre();
+                                    String user2 = usernameOfAmigo;
 
-                            // Generamos las claves de cifrado
-                            String user1 = this.getClient().getNombre();
-                            String user2 = amigo.getNombre();
+                                    // Generar clave y nonce
+                                    byte[] key = ChaChaEncryption.generateKey(user1, user2);
+                                    byte[] nonce = ChaChaEncryption.generateNonce();
 
-                            // Generar clave y nonce
-                            byte[] key = ChaChaEncryption.generateKey(user1, user2);
-                            byte[] nonce = ChaChaEncryption.generateNonce();
+                                    // Guardar clave y nonce en archivos para ambos usuarios
+                                    this.getClient().saveForUser(usernameOfAmigo, key, nonce);
+                                    amigoInterface.saveForUser(this.getClient().getInfo().getUsuario(), key, nonce);
+                                }
+                            }
 
-                            // Guardar clave y nonce en archivos para ambos usuarios
-                            ChaChaEncryption.saveKeysAndNonce(user1, user2, key, nonce);
                         }
                         // Obtenemos la conversación entre los dos usuarios
-                        Optional<Chat> chat = this.getClient().obtenerChat(amigo.getNombre());
-                        //Mensaje message = new Mensaje(this.getClient().getInfo().getUsuario(), this.getServer().obtenerClienteInfo(amigo).getUsuario(), "Hola que tal");
+                        Optional<Chat> chat = this.getClient().obtenerChat(usernameOfAmigo);
 
                         if (chat.isPresent()) {
                             // Imprimimos el chat
-                            recuperarChat(chat.get(), this.getClient().getNombre(), amigo.getNombre());
+                            recuperarChat(chat.get(), this.getClient().getNombre(), usernameOfAmigo);
                             //chat.get().anadirMensaje(message);
                             this.getClient().actualizarChat(chat.get());
                             this.getServer().actualizarClienteInfo(this.getClient());
 
-                        } else {
-                            //System.out.println("No hay chat");
                         }
                     }
 
@@ -204,23 +199,24 @@ public class AmigoController extends AbstractVentana {
         try {
             // Obtener la información del amigo
             if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
-                ClientInterface amigoInterface = this.getClient().getInterface(amigo.getNombre());
-                ClientInfo amigoInfo = amigoInterface.getClientInfo();
+                ClientInterface amigoInterface = this.getClient().getInterface(usernameOfAmigo);
+                ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(usernameOfAmigo);
 
                 // Eliminar la amistad
                 this.getClient().eliminarAmigo(amigoInfo);
                 // A mano en el destino
                 List<String> amigosDest = amigoInfo.getListaAmigos();
                 amigosDest.remove(this.getClient().getNombre());
-                amigoInterface.setListaAmigos(amigosDest);
-                //System.out.println("Desde dejar: " + amigoInterface.getClientInfo().getListaAmigos() + " || " + amigosDest);
-
+                if (amigoInterface!=null) {
+                    amigoInterface.setListaAmigos(amigosDest);
+                }
                 // Actualizar la información en el servidor para ambos usuarios
                 this.getServer().actualizarClienteInfo(this.getClient());
-                this.getServer().actualizarClienteInfo(amigoInterface);
-
-                String elim = "Eliminada amistad con " + this.getClient().getNombre();
-                amigoInterface.addNotificacion(elim);
+                this.getServer().actualizarClienteInfo(amigoInfo);
+                if (amigoInterface!= null) {
+                    String elim = "Eliminada amistad con " + this.getClient().getNombre();
+                    amigoInterface.addNotificacion(elim);
+                }
             }
 
             // Cargar el archivo FXML
@@ -280,44 +276,34 @@ public class AmigoController extends AbstractVentana {
     public void onEnviar(ActionEvent actionEvent) {
         try {
             if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
-                ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(amigo.getNombre());
+                ClientInterface amigoInterface = this.getServer().getInterface(usernameOfAmigo);
+
+                ClientInfo amigoInfo = this.getServer().obtenerClienteInfo(amigoInterface.getNombre());
+
                 if (amigoInfo.isOnline()) {
                     if (textoAEnviar.getText() !=null) {
-                        Mensaje mensaje = new Mensaje(this.getClient().getNombre(), amigo.getNombre(), textoAEnviar.getText());
+                        Mensaje mensaje = new Mensaje(this.getClient().getNombre(), amigoInterface.getNombre(), textoAEnviar.getText());
                         // Obtenemos la conversación entre los dos usuarios
-                        Optional<Chat> chat = this.getClient().obtenerChat(amigo.getNombre());
+                        Optional<Chat> chat = this.getClient().obtenerChat(amigoInterface.getNombre());
                         if (chat.isPresent()) {
                             // Encriptamos utilizando key y none
-                            ChaChaDecryption.KeyNonce keynonce = ChaChaDecryption.readKeyAndNonce(this.getClient().getNombre(), amigo.getNombre());
+                            ChaChaDecryption.KeyNonce keynonce = ChaChaDecryption.readKeyAndNonce(this.getClient().getNombre(), amigoInterface.getNombre());
                             String encryptedContenido = ChaChaEncryption.encryptMessage(mensaje.getContenido(), keynonce.getKey(), keynonce.getNonce());
                             Mensaje mensajeEncriptado = new Mensaje(mensaje.getClienteOrigen(), mensaje.getClienteDestino(), encryptedContenido, mensaje.getTiempoFormateado());
 
                             chat.get().anadirMensaje(mensajeEncriptado);
                             this.getClient().actualizarChat(chat.get());
 
-                            // Recopilamos la información del destinatario
-                            //System.out.println("Nombre: " + this.getClient().getAmigosOnLine());
-                            //System.out.println(this.getClient().getAmigosOnLine().get(amigo).getClientInfo());
-                        /*ClientInterface amigoInterface = this.getClient().getAmigosOnLine().get(amigo);
-                        System.out.println(amigoInterface.getNombre());
-                        amigoInterface.recibirMensaje(mensaje);*/
-
                             this.getServer().actualizarClienteInfo(this.getClient());
-                        /*for (Mensaje m : chat.get().getMensajes()) {
-                            System.out.println(m);
-                            agregarTexto(m);
-                        }*/
-
-                            this.getClient().enviarMensaje(this.getClient().getInterface(amigo.getNombre()), mensajeEncriptado);
+                            this.getClient().enviarMensaje(amigoInterface, mensajeEncriptado);
                         } else {
-                            System.out.println("No hay chat");
+                            this.getClient().crearChat(amigoInterface);
                         }
+                        textoAEnviar.clear();
+                        textoAEnviar.setPromptText("Escriba el mensaje");
                     }
-                } else {
-                    // nada
                 }
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

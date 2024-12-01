@@ -1,7 +1,9 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;

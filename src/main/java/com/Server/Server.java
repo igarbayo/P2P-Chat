@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Server;
 
 import java.net.MalformedURLException;
@@ -29,7 +33,6 @@ public class Server {
                 try {
                     //Imprimimos lista de clientes
                     System.out.println("LISTA DE CLIENTES");
-                    System.out.println(exportedObj.getListaClientes());
                     System.out.println("-------------");
 
                     System.out.println("Guardando la información de los clientes antes de cerrar...");

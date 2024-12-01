@@ -12,9 +12,9 @@
             <Image url="https://www.iconsdb.com/icons/preview/white/talk-xxl.png" />
          </image>
       </ImageView>
-      <Text layoutX="152.0" layoutY="59.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Username" textAlignment="RIGHT">
+      <Text layoutX="166.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Usuario" textAlignment="RIGHT">
       </Text>
-      <Text layoutX="154.0" layoutY="118.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Password" textAlignment="RIGHT">
+      <Text layoutX="140.0" layoutY="118.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Contraseña" textAlignment="RIGHT">
       </Text>
       <TextField fx:id="usernameTextField" layoutX="245.0" layoutY="42.0" promptText="Nombre de usuario" />
       <Button layoutX="279.0" layoutY="153.0" mnemonicParsing="false" onAction="#onBotonLogin" text="Iniciar sesión" />

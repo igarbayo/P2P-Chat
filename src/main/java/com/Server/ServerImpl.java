@@ -1,6 +1,9 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Server;
 
-import com.Client.Client;
 import com.Client.ClientInfo;
 import com.Client.ClientInterface;
 
@@ -10,10 +13,8 @@ import java.rmi.server.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
-/**
- * This class implements the remote interface SomeInterface.*/
+
 public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
     // Atributos
@@ -43,12 +44,6 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         this.listaClientes = new ConcurrentHashMap<>();
         this.clientesEnLinea = new ConcurrentHashMap<>();
         this.listaSolicitudes = new CopyOnWriteArrayList<>();
-    }
-
-
-    @Override
-    public Map<String, ClientInfo> getListaClientes() throws RemoteException {
-        return listaClientes;
     }
 
     @Override
@@ -195,6 +190,17 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
     }
 
+    @Override
+    public void actualizarClienteInfo(ClientInfo clientInfo) throws RemoteException {
+        if (clientInfo != null && clientInfo.getUsuario() != null) {
+            // Eliminar la instancia actual asociada al usuario, si existe
+            listaClientes.remove(clientInfo.getUsuario());
+
+            // Agregar la nueva información del cliente
+            listaClientes.put(clientInfo.getUsuario(), clientInfo);
+        }
+    }
+
     // REVISAR
     @Override
     public ClientInfo obtenerClienteInfo(String username) throws RemoteException {
@@ -243,22 +249,30 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     public void anadirClienteOnLine(ClientInterface client) throws RemoteException {
         if (client != null) {
             // Añadimos el cliente a lista del servidor
-
             clientesEnLinea.put(client.getNombre(), client);
 
             // Recuperamos sus amigos en linea
             List<ClientInterface> listaANotificar=new ArrayList<>();;
-
             Map<String, ClientInterface> mapa = this.obtenerAmigosEnLinea(client);
             if (mapa != null) {
                 client.setAmigosOnline(mapa);
                 listaANotificar.addAll(mapa.values());
+                for (ClientInterface amigo : mapa.values()) {
+                    amigo.addAmigoOnline(client);
+                }
             }
+
+            // Cambiamos a online su bit en sus amigos online
             client.setOnline(client.getAmigosOnline());
+
+            // Actualizamos su info en el servidor
             actualizarClienteInfo(client);
+
+            // Notificamos a sus amigos en linea
             notificar(listaANotificar, "Tu amigo "+client.getNombre()+" se ha conectado");
+
+            // Actualizamos la info en el servidor
             this.actualizarClienteEnLinea(client,1);
-            System.out.println(clientesEnLinea.keySet());
             if (this.listaClientes != null) {
                 for (ClientInfo info : listaClientes.values()) {
                     if(client.getClientInfo().getUsuario().equals(info.getUsuario())) {
@@ -285,7 +299,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
 
         // Obtener la lista de nombres de usuario de los amigos del cliente
-        List<String> nombresAmigos = clienteInfo.getListaAmigos();
+        List<String> nombresAmigos = obtenerAmigos(clienteInterface.getClientInfo().getUsuario());
         if (nombresAmigos == null || nombresAmigos.isEmpty()) {
             return Map.of(); // Devuelve un mapa vacío si no hay amigos en la lista
         }
@@ -316,7 +330,6 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
         ClientInfo cliente = this.listaClientes.get(usuario);
 
-        //System.out.println("He llegado a 1");
         if (cliente != null) {
             for (String amigo_usr : cliente.getListaAmigos()) {
                 amigos.add(amigo_usr);
@@ -325,44 +338,6 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
         // Devolver la lista de amigos
         return amigos;
-    }
-
-    @Override
-    public void actualizarGrupoAmistad() throws RemoteException {
-        // Lista para almacenar clientes que necesitan ser notificados
-        List<Client> clientesANotificar = new ArrayList<>();
-
-        // Recorrer todos los clientes en línea y actualizar sus listas de amigos
-        for (ClientInterface cliente : clientesEnLinea.values()) {
-            try {
-                // Obtener la información actual del cliente
-                if (cliente.getNombre() != null) {
-                    // Obtener la información más actualizada del servidor
-                    ClientInfo infoActualizada = listaClientes.get(cliente.getNombre());
-
-
-                    // Verificar si hay cambios en la lista de amigos
-                    if (!obtenerAmigos(cliente.getNombre()).equals(infoActualizada.getListaAmigos())) {
-                        // Crear un cliente temporal para la notificación
-                        Client clienteTemp = new Client();
-                        clienteTemp.setInfo(infoActualizada);
-                        clientesANotificar.add(clienteTemp);
-
-                        // Actualizar la información del cliente en línea
-                        cliente.setListaAmigos(new ArrayList<>(infoActualizada.getListaAmigos()));
-                    }
-                }
-            } catch (RemoteException e) {
-                // Si hay un error al comunicarse con un cliente, continuamos con el siguiente
-                e.printStackTrace();
-            }
-        }
-
-        // Si hay clientes para notificar, enviamos las notificaciones
-        if (!clientesANotificar.isEmpty()) {
-            //String mensaje = "Tu lista de amigos ha sido actualizada";
-            //habría que hacerlo desde confirmacion aceptada notificar(clientesANotificar, mensaje);
-        }
     }
 
     @Override
@@ -383,11 +358,11 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     @Override
     public void eliminarDeClientesConectados(ClientInterface cliente) throws RemoteException {
         if(cliente != null) {
-            clientesEnLinea.remove(cliente.getNombre());
+            clientesEnLinea.remove(cliente.getClientInfo().getUsuario());
+            //Notifico de la desconexion.
+            this.actualizarClienteEnLinea(cliente,2);
+            notificarAmigos(cliente,"Tu amigo "+cliente.getClientInfo().getUsuario()+" se ha desconectado.");
         }
-        //Notifico de la desconexion.
-        this.actualizarClienteEnLinea(cliente,2);
-        notificarAmigos(cliente,"Tu amigo "+cliente.getNombre()+" se ha desconectado.");
     }
 
     @Override

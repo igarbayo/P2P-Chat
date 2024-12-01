@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.gui;
 
 import com.Client.ClientInterface;
@@ -10,13 +14,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-
 import javafx.event.ActionEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -34,7 +37,7 @@ public class PrincipalController extends AbstractVentana {
 
     // Elementos gráficos
     @FXML
-    private ListView<String> listaAmigos;
+    private ListView<HBox> listaAmigos;
     @FXML
     private ListView<HBox> listaSolicitudes;
     @FXML
@@ -52,24 +55,15 @@ public class PrincipalController extends AbstractVentana {
     private static final ReentrantLock lockAmigos = new ReentrantLock();
 
     private static final int MAX_MESSAGES = 100;
-    private List<String> mensajePendiente;
-    ObservableList<String> amigosObservableList;
+    ObservableList<HBox> amigosObservableList;
     private Stage stage;
 
-    public ObservableList<String> getAmigosObservableList() {
+    public ObservableList<HBox> getAmigosObservableList() {
         return amigosObservableList;
     }
 
-    public void setAmigosObservableList(ObservableList<String> amigosObservableList) {
+    public void setAmigosObservableList(ObservableList<HBox> amigosObservableList) {
         this.amigosObservableList = amigosObservableList;
-    }
-
-    /*public List<String> getMensajePendiente() {
-        return mensajePendiente;
-    }*/
-
-    public void recargarVista() {
-
     }
 
 
@@ -98,12 +92,10 @@ public class PrincipalController extends AbstractVentana {
                     }
                 }
 
-                System.out.println("Desde origen: " + this.getServer().obtenerClienteInfo(amigoSeleccionado));
-
                 AmigoController controller = fxmlLoader.getController();
                 controller.setServer(this.getServer());
                 controller.setClient(this.getClient());
-                controller.setAmigo(this.getClient().getInterface(amigoSeleccionado)); // Aquí pasas el nombre o la información del amigo seleccionado
+                controller.setUsernameAmigo(amigoSeleccionado); // Aquí pasas el nombre o la información del amigo seleccionado
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -121,6 +113,7 @@ public class PrincipalController extends AbstractVentana {
         DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
         String tiempoFormateado=tiempoActual.format(formato);
         Text bienvenido = new Text("[" + tiempoFormateado + "] " + "Bienvenido");
+        bienvenido.setStyle("-fx-fill: -fx--white;");
 
         lista = FXCollections.observableArrayList();
         lista.add(0, bienvenido);
@@ -130,7 +123,6 @@ public class PrincipalController extends AbstractVentana {
 
         // Definir la tarea a ejecutar
         Runnable task = () -> {
-            //System.out.println("Tarea ejecutada a las: " + System.currentTimeMillis());
             // Lógica para actualizar la ventana
             Platform.runLater(() -> {
                 if (usernameLabel.getScene() != null) {
@@ -165,9 +157,27 @@ public class PrincipalController extends AbstractVentana {
                                     try {
                                         ClientInterface amigo = this.getClient().getInterface(username);
                                         if (this.getServer().obtenerClienteInfo(username) !=null) {
-                                            String estado = username + (this.getServer().obtenerClienteInfo(username).isOnline() ? " [Online]" : " [Offline]");
-                                            //String estado = username + (amigo.getOnline() ? " [ONLINE]" : " [OFFLINE]");
-                                            amigosObservableList.add(estado);
+                                            boolean estado = this.getServer().obtenerClienteInfo(username).isOnline();
+                                            HBox hbox = new HBox();
+                                            hbox.setAlignment(Pos.CENTER_LEFT);
+                                            // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
+                                            Region spacer = new Region();
+                                            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
+                                            Label label = new Label(username);
+                                            // Crear un círculo
+                                            Circle circle = new Circle();
+                                            circle.setRadius(10); // Radio del círculo
+                                            if (estado) {
+                                                circle.setFill(Color.GREEN); // Color de relleno
+                                            } else {
+                                                circle.setFill(Color.RED); // Color de relleno
+                                            }
+                                            circle.setStroke(Color.BLACK); // Borde opcional
+                                            circle.setStrokeWidth(1); // Ancho del borde
+
+                                            hbox.getChildren().addAll(label, spacer, circle);
+                                            hbox.setOnMouseClicked(event -> openAmigoView(username));
+                                            amigosObservableList.add(hbox);
                                         }
                                     } catch (RemoteException e) {
                                         e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
@@ -211,7 +221,6 @@ public class PrincipalController extends AbstractVentana {
                                             List<String> amigosDest = clientInterface.getClientInfo().getListaAmigos();
                                             amigosDest.add(this.getClient().getNombre());
                                             clientInterface.setListaAmigos(amigosDest);
-                                            System.out.println(clientInterface.getClientInfo().getListaAmigos());
 
                                             // Actualizar amigos online
                                             this.getClient().addAmigoOnline(username, clientInterface);
@@ -221,11 +230,6 @@ public class PrincipalController extends AbstractVentana {
                                             this.getServer().actualizarClienteInfo(clientInterface);
                                             clientInterface.confirmarAmistad(this.getClient().getNombre());
                                             this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                            //Debug
-                                            System.out.println(clientInterface.getClientInfo().getListaAmigos());
-                                            System.out.println(clientInterface.getClientInfo().getListaAmigos());
-                                            System.out.println(this.getServer().obtenerAmigos(clientInterface.getNombre()));
 
                                             // Ventana gráfica
                                             this.getClient().addNotificacion("Aceptado");
@@ -272,26 +276,6 @@ public class PrincipalController extends AbstractVentana {
                             }
                         } finally {
                             lockSolicitudes.unlock();
-                        }
-
-
-                        lockAmigos.lock();
-                        try {
-                            // Agregar el evento de selección para la ListView de amigos
-                            listaAmigos.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                                if (newValue != null) {
-                                    // Extrae el nombre del amigo seleccionado
-                                    String amigoSeleccionado = newValue.split(" ")[0];
-
-                                    // Llamar al método para abrir la ventana correspondiente
-                                    openAmigoView(amigoSeleccionado);
-
-                                    // Restablece la selección a nula después de abrir la ventana
-                                    Platform.runLater(() -> listaAmigos.getSelectionModel().clearSelection());
-                                }
-                            });
-                        } finally {
-                            lockAmigos.unlock();
                         }
                     }
                 } catch (Exception e) {
@@ -384,8 +368,6 @@ public class PrincipalController extends AbstractVentana {
         List<String> notificacionesCopia = new ArrayList<>(this.getClient().getListaNotificaciones());
 
         for (String notificacion : notificacionesCopia) {
-
-            System.out.println(notificacion);
             Text text = new Text("[" + tiempoFormateado + "] " + notificacion);
             text.setStyle("-fx-fill: -fx--white;");
 
@@ -398,8 +380,6 @@ public class PrincipalController extends AbstractVentana {
 
             // Añadir el texto a la consola
             lista.add(0,text);
-            System.out.println(text);
-            //consola.requestLayout();
 
             // Limitar el tamaño de la consola
             if (lista.size() > MAX_MESSAGES) {
@@ -412,14 +392,6 @@ public class PrincipalController extends AbstractVentana {
         } else {
             listView.setItems(FXCollections.observableArrayList(new ArrayList<>()));
         }
-
-
-
-        //Añado un objeto texto a la consola.
-        //borra el texto antiguo
-
-
-
 
     }
 

@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.gui;
 
 import com.Client.ClientInterface;
@@ -9,7 +13,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -25,7 +28,6 @@ public class SolicitudController extends AbstractVentana {
     private Label usernameLabel;
 
     private boolean valido = true;
-
 
 
     @Override
@@ -72,7 +74,6 @@ public class SolicitudController extends AbstractVentana {
                         } else {
                             valido = false;
                         }
-                        System.out.println(valido);
                         errorText.setVisible(!valido);
                     }
                 }

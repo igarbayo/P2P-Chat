@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.security;
 
 import org.bouncycastle.crypto.engines.ChaChaEngine;
@@ -68,20 +72,6 @@ public class ChaChaDecryption {
         byte[] nonce = Base64.getDecoder().decode(nonceBase64);
 
         return new KeyNonce(key, nonce);
-    }
-
-    // Función para leer y desencriptar
-    public static String decryptForUsers(String user, String otherUser, String encryptedMessage) {
-        try {
-            // Leer clave y nonce del archivo
-            KeyNonce keyNonce = readKeyAndNonce(user, otherUser);
-
-            // Desencriptar mensaje
-            return decryptMessage(encryptedMessage, keyNonce.key, keyNonce.nonce);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error decrypting message: " + e.getMessage();
-        }
     }
 
     // Clase auxiliar para clave y nonce

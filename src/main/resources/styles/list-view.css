@@ -10,18 +10,11 @@
 
 .list-cell {
     -fx-text-fill: -fx--white;
-}
-
-.list-cell:odd {
-    -fx-background-color: -fx--neutral-blue;
-}
-
-.list-cell:even {
     -fx-background-color: -fx--dark-blue;
 }
 
 .list-cell:hover, .list-cell:selected {
-    -fx-background-color: -fx--highlight;
+    -fx-background-color: -fx--neutral-blue;
     -fx-text-fill: -fx--black;
     -fx-cursor: hand;
 }
@@ -31,7 +24,7 @@
 }
 
 .list-view .scroll-bar .thumb {
-    -fx-background-color: -fx--highlight;
+    -fx-background-color: -fx--neutral-blue;
 }
 .list-view .scroll-bar .track {
     -fx-background-color: -fx--dark-gray;

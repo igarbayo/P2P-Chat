@@ -1,3 +1,7 @@
+// P2P. Computación Distribuida
+// Curso 2024 - 2025
+// Ignacio Garbayo y Carlos Hermida
+
 package com.Client.security;
 
 import org.bouncycastle.crypto.engines.ChaChaEngine;
@@ -71,32 +75,6 @@ public class ChaChaEncryption {
         secureRandom.nextBytes(nonce);
         return nonce;
     }
-
-    // Guardar la clave y el nonce en archivos para ambos usuarios
-    public static void saveKeysAndNonce(String user1, String user2, byte[] key, byte[] nonce) {
-        try {
-            // Crear rutas para ambos usuarios
-            saveForUser(user1, user2, key, nonce);
-            saveForUser(user2, user1, key, nonce);
-        } catch (IOException e) {
-            throw new RuntimeException("Error saving key and nonce", e);
-        }
-    }
-
-    // Guardar la clave y nonce para un usuario específico
-    private static void saveForUser(String user, String otherUser, byte[] key, byte[] nonce) throws IOException {
-        // Crear carpeta del usuario si no existe
-        String userPath = BASE_PATH + user;
-        Files.createDirectories(Paths.get(userPath));
-
-        // Crear el archivo
-        File file = new File(userPath + "/" + otherUser + ".key");
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write("Key: " + Base64.getEncoder().encodeToString(key) + "\n");
-            writer.write("Nonce: " + Base64.getEncoder().encodeToString(nonce) + "\n");
-        }
-    }
-
 
 }
 
