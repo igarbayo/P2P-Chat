@@ -342,6 +342,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface, Seri
         }
     }
 
+    @Override
+    public ClientInfo obtenerAmigoInfo(String usernameAmigo) throws RemoteException {
+        if (usernameAmigo == null || usernameAmigo.isEmpty()) {
+            return null; // Devuelve null si el nombre de usuario es nulo o vacío
+        }
+
+        return amigosOnLine.get(usernameAmigo).getClientInfo(); // Busca y devuelve el ClientInfo en el mapa
+    }
+
 
     @Override
     public boolean equals(Object o) {

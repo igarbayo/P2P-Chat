@@ -12,6 +12,8 @@ import java.util.Map;
 
 public interface ServerInterface extends Remote {
 
+    // Imprime "hola" por pantalla
+    void hola() throws RemoteException;
     // Carga información de base de datos
     void cargarInformacionClientes() throws RemoteException;
     // Guarda información en base de datos

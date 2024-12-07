@@ -129,7 +129,7 @@ public class PrincipalController extends AbstractVentana {
             Platform.runLater(() -> {
                 if (usernameLabel.getScene() != null) {
                     stage = (Stage) usernameLabel.getScene().getWindow();
-                    if (stage != null) {
+                    if (stage != null && estaServidorDisponible()) {
                         Runtime.getRuntime().addShutdownHook(new Thread(this::safeHandleWindowClose));
                         stage.setOnCloseRequest(event -> {
                             safeHandleWindowClose();
@@ -145,144 +145,193 @@ public class PrincipalController extends AbstractVentana {
                 //this.mensajePendiente.add(mensaje);
                 printEnConsola();
 
-                try {
-                    if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
-                        // Manejo de amigos
-                        lockAmigos.lock();
-                        try {
-                            amigosObservableList = FXCollections.observableArrayList();
+                if (estaServidorDisponible()) {
+                    try {
+                        if (this.getServer().estaLogueado(this.getClient().getInfo().getUsuario())) {
+                            // Manejo de amigos
+                            lockAmigos.lock();
+                            try {
+                                amigosObservableList = FXCollections.observableArrayList();
 
-                            if (this.getServer() != null && this.getClient() != null) {
-                                List<String> amigosUsuarios = this.getServer().obtenerAmigos(this.getClient().getInfo().getUsuario());
+                                if (this.getServer() != null && this.getClient() != null) {
+                                    List<String> amigosUsuarios = this.getServer().obtenerAmigos(this.getClient().getInfo().getUsuario());
 
-                                for (String username : amigosUsuarios) {
-                                    try {
-                                        ClientInterface amigo = this.getClient().getInterface(username);
-                                        if (this.getServer().obtenerClienteInfo(username) !=null) {
-                                            boolean estado = this.getServer().obtenerClienteInfo(username).isOnline();
-                                            HBox hbox = new HBox();
-                                            hbox.setAlignment(Pos.CENTER_LEFT);
-                                            // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
-                                            Region spacer = new Region();
-                                            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
-                                            Label label = new Label(username);
-                                            // Crear un círculo
-                                            Circle circle = new Circle();
-                                            circle.setRadius(10); // Radio del círculo
-                                            if (estado) {
-                                                circle.setFill(Color.GREEN); // Color de relleno
-                                            } else {
-                                                circle.setFill(Color.RED); // Color de relleno
+                                    for (String username : amigosUsuarios) {
+                                        try {
+                                            ClientInterface amigo = this.getClient().getInterface(username);
+                                            if (this.getServer().obtenerClienteInfo(username) !=null) {
+                                                boolean estado = this.getServer().obtenerClienteInfo(username).isOnline();
+                                                HBox hbox = new HBox();
+                                                hbox.setAlignment(Pos.CENTER_LEFT);
+                                                // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
+                                                Region spacer = new Region();
+                                                HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
+                                                Label label = new Label(username);
+                                                // Crear un círculo
+                                                Circle circle = new Circle();
+                                                circle.setRadius(10); // Radio del círculo
+                                                if (estado) {
+                                                    circle.setFill(Color.GREEN); // Color de relleno
+                                                } else {
+                                                    circle.setFill(Color.RED); // Color de relleno
+                                                }
+                                                circle.setStroke(Color.BLACK); // Borde opcional
+                                                circle.setStrokeWidth(1); // Ancho del borde
+
+                                                hbox.getChildren().addAll(label, spacer, circle);
+                                                hbox.setOnMouseClicked(event -> openAmigoView(username));
+                                                amigosObservableList.add(hbox);
                                             }
-                                            circle.setStroke(Color.BLACK); // Borde opcional
-                                            circle.setStrokeWidth(1); // Ancho del borde
-
-                                            hbox.getChildren().addAll(label, spacer, circle);
-                                            hbox.setOnMouseClicked(event -> openAmigoView(username));
-                                            amigosObservableList.add(hbox);
-                                        }
-                                    } catch (RemoteException e) {
-                                        e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
-                                    }
-                                }
-                                listaAmigos.setItems(amigosObservableList);
-                            }
-                        } finally {
-                            lockAmigos.unlock();
-                        }
-
-
-                        lockSolicitudes.lock();
-                        try {
-                            // Manejo de lista de solicitudes
-                            // Vaciar el ListView
-                            listaSolicitudes.getItems().clear();
-                            if (this.getClient() != null) {
-                                List<String> solicitudes;
-                                solicitudes = this.getServer().getSolicitudes(this.getClient());
-                                for (String username : solicitudes) {
-                                    HBox hbox = new HBox();
-                                    hbox.setAlignment(Pos.CENTER_LEFT);
-                                    // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
-                                    Region spacer = new Region();
-                                    HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
-                                    Label label = new Label(username);
-                                    Button acceptButton = new Button("V");
-                                    acceptButton.setStyle("-fx-background-color: green;");
-                                    Button rejectButton = new Button("X");
-                                    rejectButton.setStyle("-fx-background-color: red;");
-
-                                    // Asignar acción de aceptar
-                                    acceptButton.setOnAction(event -> {
-                                        ClientInterface clientInterface = null;
-                                        try {
-                                            clientInterface = this.getServer().getInterface(username);
-                                            this.getClient().aceptarSolicitudAmistad(clientInterface.getClientInfo());
-
-                                            // Añadir cliente a mano
-                                            List<String> amigosDest = clientInterface.getClientInfo().getListaAmigos();
-                                            amigosDest.add(this.getClient().getNombre());
-                                            clientInterface.setListaAmigos(amigosDest);
-
-                                            // Actualizar amigos online
-                                            this.getClient().addAmigoOnline(username, clientInterface);
-                                            clientInterface.addAmigoOnline(this.getClient().getInfo().getUsuario(), this.getClient());
-
-                                            this.getServer().actualizarClienteInfo(this.getClient());
-                                            this.getServer().actualizarClienteInfo(clientInterface);
-                                            clientInterface.confirmarAmistad(this.getClient().getNombre());
-                                            this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                            // Ventana gráfica
-                                            this.getClient().addNotificacion("Aceptado");
-                                            String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
-                                            clientInterface.addNotificacion(acepto);
-                                            //this.getClient().notificarRecarga(clientInterface);
-                                            //this.recargar(stage, "PrincipalCliente-view.fxml");
-
-
                                         } catch (RemoteException e) {
-                                            throw new RuntimeException(e);
+                                            e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
                                         }
-
-                                    });
-
-                                    // Asignar acción de rechazar
-                                    rejectButton.setOnAction(event -> {
-                                        ClientInterface clientInterface = null;
-                                        try {
-                                            clientInterface = this.getServer().getInterface(username);
-                                            this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
-
-                                            // recargar la ventana gráfica
-                                            this.getClient().addNotificacion("Rechazado");
-                                            String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
-                                            clientInterface.addNotificacion(rechazo);
-                                            //this.getClient().notificarRecarga(clientInterface);
-                                            //this.recargar(stage, "PrincipalCliente-view.fxml");
-
-                                        } catch (RemoteException e) {
-                                            throw new RuntimeException(e);
-                                        }
-
-                                    });
-
-                                    // Añadir solicitudes a la lista
-                                    hbox.getChildren().addAll(label, spacer, acceptButton, rejectButton);
-                                    if (!listaSolicitudes.getItems().contains(hbox)) {
-                                        listaSolicitudes.getItems().add(hbox);
                                     }
+                                    listaAmigos.setItems(amigosObservableList);
                                 }
-                            } else {
-                                listaSolicitudes.setItems(FXCollections.observableList(new ArrayList<>()));
+                            } finally {
+                                lockAmigos.unlock();
                             }
-                        } finally {
-                            lockSolicitudes.unlock();
+
+
+                            lockSolicitudes.lock();
+                            try {
+                                // Manejo de lista de solicitudes
+                                // Vaciar el ListView
+                                listaSolicitudes.getItems().clear();
+                                if (this.getClient() != null) {
+                                    List<String> solicitudes;
+                                    solicitudes = this.getServer().getSolicitudes(this.getClient());
+                                    for (String username : solicitudes) {
+                                        HBox hbox = new HBox();
+                                        hbox.setAlignment(Pos.CENTER_LEFT);
+                                        // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
+                                        Region spacer = new Region();
+                                        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
+                                        Label label = new Label(username);
+                                        Button acceptButton = new Button("V");
+                                        acceptButton.setStyle("-fx-background-color: green;");
+                                        Button rejectButton = new Button("X");
+                                        rejectButton.setStyle("-fx-background-color: red;");
+
+                                        // Asignar acción de aceptar
+                                        acceptButton.setOnAction(event -> {
+                                            ClientInterface clientInterface = null;
+                                            try {
+                                                clientInterface = this.getServer().getInterface(username);
+                                                this.getClient().aceptarSolicitudAmistad(clientInterface.getClientInfo());
+
+                                                // Añadir cliente a mano
+                                                List<String> amigosDest = clientInterface.getClientInfo().getListaAmigos();
+                                                amigosDest.add(this.getClient().getNombre());
+                                                clientInterface.setListaAmigos(amigosDest);
+
+                                                // Actualizar amigos online
+                                                this.getClient().addAmigoOnline(username, clientInterface);
+                                                clientInterface.addAmigoOnline(this.getClient().getInfo().getUsuario(), this.getClient());
+
+                                                this.getServer().actualizarClienteInfo(this.getClient());
+                                                this.getServer().actualizarClienteInfo(clientInterface);
+                                                clientInterface.confirmarAmistad(this.getClient().getNombre());
+                                                this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
+
+                                                // Ventana gráfica
+                                                this.getClient().addNotificacion("Aceptado");
+                                                String acepto = "Solicitud a " + this.getClient().getNombre() + " aceptada";
+                                                clientInterface.addNotificacion(acepto);
+                                                //this.getClient().notificarRecarga(clientInterface);
+                                                //this.recargar(stage, "PrincipalCliente-view.fxml");
+
+
+                                            } catch (RemoteException e) {
+                                                throw new RuntimeException(e);
+                                            }
+
+                                        });
+
+                                        // Asignar acción de rechazar
+                                        rejectButton.setOnAction(event -> {
+                                            ClientInterface clientInterface = null;
+                                            try {
+                                                clientInterface = this.getServer().getInterface(username);
+                                                this.getServer().eliminarSolicitud(username, this.getClient().getNombre());
+
+                                                // recargar la ventana gráfica
+                                                this.getClient().addNotificacion("Rechazado");
+                                                String rechazo = "Solicitud a " + this.getClient().getNombre() + " rechazada";
+                                                clientInterface.addNotificacion(rechazo);
+                                                //this.getClient().notificarRecarga(clientInterface);
+                                                //this.recargar(stage, "PrincipalCliente-view.fxml");
+
+                                            } catch (RemoteException e) {
+                                                throw new RuntimeException(e);
+                                            }
+
+                                        });
+
+                                        // Añadir solicitudes a la lista
+                                        hbox.getChildren().addAll(label, spacer, acceptButton, rejectButton);
+                                        if (!listaSolicitudes.getItems().contains(hbox)) {
+                                            listaSolicitudes.getItems().add(hbox);
+                                        }
+                                    }
+                                } else {
+                                    listaSolicitudes.setItems(FXCollections.observableList(new ArrayList<>()));
+                                }
+                            } finally {
+                                lockSolicitudes.unlock();
+                            }
                         }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } else {
+                    // Manejo de amigos
+                    lockAmigos.lock();
+                    try {
+                        amigosObservableList = FXCollections.observableArrayList();
+
+                        if (this.getClient() != null) {
+                            List<String> amigosUsuarios = this.getClient().getInfo().getListaAmigos();
+
+                            for (String username : amigosUsuarios) {
+                                try {
+                                    ClientInterface amigo = this.getClient().getInterface(username);
+                                    if (this.getClient().obtenerAmigoInfo(username) !=null) {
+                                        boolean estado = this.getClient().obtenerAmigoInfo(username).isOnline();
+                                        HBox hbox = new HBox();
+                                        hbox.setAlignment(Pos.CENTER_LEFT);
+                                        // Agregar el espacio en blanco (Region) que empuja los botones a la derecha
+                                        Region spacer = new Region();
+                                        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS); // Hace que el spacer ocupe todo el espacio disponible
+                                        Label label = new Label(username);
+                                        // Crear un círculo
+                                        Circle circle = new Circle();
+                                        circle.setRadius(10); // Radio del círculo
+                                        if (estado) {
+                                            circle.setFill(Color.GREEN); // Color de relleno
+                                        } else {
+                                            circle.setFill(Color.RED); // Color de relleno
+                                        }
+                                        circle.setStroke(Color.BLACK); // Borde opcional
+                                        circle.setStrokeWidth(1); // Ancho del borde
+
+                                        hbox.getChildren().addAll(label, spacer, circle);
+                                        hbox.setOnMouseClicked(event -> openAmigoView(username));
+                                        amigosObservableList.add(hbox);
+                                    }
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();  // Aquí puedes manejar el error si no se puede obtener la información de un amigo
+                                }
+                            }
+                            listaAmigos.setItems(amigosObservableList);
+                        }
+                    } finally {
+                        lockAmigos.unlock();
+                    }
+
                 }
+
+
 
             });
 

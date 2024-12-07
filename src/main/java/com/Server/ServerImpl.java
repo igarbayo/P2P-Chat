@@ -47,6 +47,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }
 
     @Override
+    public // Imprime "hola" por pantalla
+    void hola() throws RemoteException {
+        System.out.println("Hola");
+    }
+
+    @Override
     public void cargarInformacionClientes() throws RemoteException {
         String filePath = "src/main/resources/com/Server/clientInfo.txt";
         File file = new File(filePath);

@@ -57,5 +57,6 @@ public interface ClientInterface extends Remote {
     void addAmigoOnline(ClientInterface client) throws RemoteException;
     // Guarda claves de encriptado
     void saveForUser(String username, byte[] key, byte[] nonce) throws RemoteException, IOException;
-
+    // Obtener la info de un amigo
+    ClientInfo obtenerAmigoInfo(String usernameAmigo) throws RemoteException;
 }

@@ -89,4 +89,19 @@ public abstract class AbstractVentana implements Initializable {
         }
     }
 
+    public boolean estaServidorDisponible() {
+        try {
+            // Llama a un método remoto simple como "ping" o verifica algún estado
+            server.hola();
+            return true;
+        } catch (java.rmi.ConnectException e) {
+            System.err.println("Servidor no disponible: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error al verificar el servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+
 }
