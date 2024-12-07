@@ -45,6 +45,8 @@ public class PrincipalController extends AbstractVentana {
     @FXML
     private Button botonLogout;
     @FXML
+    private Button botonCambiar;
+    @FXML
     private Label usernameLabel;
     @FXML
     private ListView<Text> listView;
@@ -355,6 +357,40 @@ public class PrincipalController extends AbstractVentana {
         }
 
     }
+
+    @FXML
+    public void onCambiar(ActionEvent event) {
+        try {
+            // Cargar el archivo FXML
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Cambiar-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+
+            // CSS
+            scene.getStylesheets().add(getClass().getResource("/styles/basic.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/button.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/colors.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/list-view.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-area.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/text-field.css").toExternalForm());
+
+            // Crear un nuevo Stage para la nueva ventana
+            Stage newStage = new Stage();
+            newStage.setScene(scene);
+            newStage.show();
+            // Guarda el stage actual
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+
+            // Pasa la instancia del servidor y del cliente al controlador de la nueva ventana
+            CambiarController controller = fxmlLoader.getController();
+            controller.setServer(this.getServer());
+            controller.setClient(this.getClient());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
     //Metodo para imprimir ciertas notificaciones en la consola
     @FXML
     public void printEnConsola() {

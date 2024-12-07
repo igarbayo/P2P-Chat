@@ -17,12 +17,13 @@
        <ListView fx:id="listaSolicitudes" layoutX="360.0" layoutY="54.0" prefHeight="431.0" prefWidth="181.0" />
        <Label layoutX="415.0" layoutY="30.0" text="Solicitudes" />
       <Button fx:id="botonEnviar" layoutX="627.0" layoutY="85.0" mnemonicParsing="false" onAction="#onEnviar" prefHeight="24.0" prefWidth="218.0" text="Enviar solicitud" />
-      <Button fx:id="botonLogout" layoutX="627.0" layoutY="151.0" mnemonicParsing="false" onAction="#onLogout" prefHeight="24.0" prefWidth="218.0" text="Cerrar sesión" textAlignment="CENTER" />
+      <Button fx:id="botonCambiar" layoutX="627.0" layoutY="139.0" mnemonicParsing="false" onAction="#onCambiar" prefHeight="24.0" prefWidth="218.0" text="Cambiar contraseña" textAlignment="CENTER" />
       <Label layoutX="27.0" layoutY="97.0" text="Usuario:" />
       <Label fx:id="usernameLabel" layoutX="46.0" layoutY="127.0" prefHeight="24.0" prefWidth="86.0" text="username" textAlignment="CENTER" />
       <ListView fx:id="listView" layoutX="552.0" layoutY="275.0" prefHeight="210.0" prefWidth="333.0" />
       <Label layoutX="682.0" layoutY="30.0" text="Más opciones" />
       <Label layoutX="682.0" layoutY="250.0" text="Notificaciones" />
       <Line endX="-114.0" endY="471.0" layoutX="233.0" layoutY="29.0" startX="-114.0" startY="-29.0" stroke="#222831" />
+      <Button fx:id="botonLogout" layoutX="627.0" layoutY="195.0" mnemonicParsing="false" onAction="#onLogout" prefHeight="24.0" prefWidth="218.0" text="Cerrar sesión" textAlignment="CENTER" />
    </children>
 </AnchorPane>
